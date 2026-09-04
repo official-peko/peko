@@ -5,6 +5,7 @@
 
 pub mod builder;
 pub mod markdown;
+pub mod sarif;
 pub mod schema;
 
 pub use builder::{ReportBuilder, TOOL_VERSION};

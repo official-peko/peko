@@ -39,15 +39,37 @@ pub fn describe(status: reqwest::StatusCode, body: &str) -> anyhow::Error {
     anyhow::anyhow!("the server answered {status}")
 }
 
-pub fn lint(
-    root: &Path,
-    all: bool,
-    since: &str,
-    platform: Option<&str>,
-    json: bool,
-    fail_on: &str,
-    allow_undecided: bool,
-) -> Result<i32> {
+/// What one lint run was asked for.
+///
+/// These arrived as eight positional arguments, and a caller that swapped two
+/// bools got a different run with no complaint from the compiler.
+pub struct LintOptions<'a> {
+    /// Check the whole project rather than what changed.
+    pub all: bool,
+    /// The commit to compare against.
+    pub since: &'a str,
+    /// Name the platform rather than read it from the config.
+    pub platform: Option<&'a str>,
+    /// Print the report as JSON.
+    pub json: bool,
+    /// Also write SARIF here, for Code Scanning.
+    pub sarif: Option<&'a Path>,
+    /// The severity that makes the command exit non zero.
+    pub fail_on: &'a str,
+    /// Report a pass even when a fact has no answer.
+    pub allow_undecided: bool,
+}
+
+pub fn lint(root: &Path, options: &LintOptions<'_>) -> Result<i32> {
+    let LintOptions {
+        all,
+        since,
+        platform,
+        json,
+        sarif,
+        fail_on,
+        allow_undecided,
+    } = *options;
     let mut config = Config::load(root)?;
     if let Some(named) = platform {
         config.platform = named.to_string();
@@ -61,7 +83,7 @@ pub fn lint(
     // Without this, a first run needed a deployed server and an issued key,
     // and neither exists for somebody who has not signed up.
     let Ok(key) = config.api_key() else {
-        return lint_locally(root, &config, all, since, json, fail_on, allow_undecided);
+        return lint_locally(root, &config, options);
     };
 
     let changed = if all {
@@ -102,6 +124,9 @@ pub fn lint(
     }
 
     let report: serde_json::Value = serde_json::from_str(&text)?;
+    if let Some(path) = sarif {
+        write_sarif(&report, path)?;
+    }
     if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
         return Ok(render::exit_code(&report, fail_on));
@@ -117,16 +142,36 @@ pub fn lint(
     Ok(1)
 }
 
+/// Write the report as SARIF, so Code Scanning can put it on the diff.
+///
+/// A clean run writes the file too. Without one, Code Scanning keeps
+/// yesterday's alerts open after the fix that closed them.
+fn write_sarif(report: &serde_json::Value, path: &Path) -> Result<()> {
+    let parsed: peko_report::Report = serde_json::from_value(report.clone())
+        .context("the report does not match the schema SARIF is built from")?;
+    let document = peko_report::sarif::render(&parsed);
+    if let Some(parent) = path.parent() {
+        if !parent.as_os_str().is_empty() {
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("failed to make {}", parent.display()))?;
+        }
+    }
+    std::fs::write(path, serde_json::to_string_pretty(&document)? + "\n")
+        .with_context(|| format!("failed to write {}", path.display()))?;
+    Ok(())
+}
+
 /// Run the mechanical checks here, with the database compiled in.
-fn lint_locally(
-    root: &Path,
-    config: &Config,
-    all: bool,
-    since: &str,
-    json: bool,
-    fail_on: &str,
-    allow_undecided: bool,
-) -> Result<i32> {
+fn lint_locally(root: &Path, config: &Config, options: &LintOptions<'_>) -> Result<i32> {
+    let LintOptions {
+        all,
+        since,
+        json,
+        sarif,
+        fail_on,
+        allow_undecided,
+        ..
+    } = *options;
     if !all {
         // The server path sends only what changed. The local path reads the
         // whole project, because the engine walks the tree itself and a
@@ -138,6 +183,9 @@ fn lint_locally(
     }
     let (_, source) = update::database(Some(&config.api_url))?;
     let report = local::lint(root, &config.platform, Some(&config.api_url))?;
+    if let Some(path) = sarif {
+        write_sarif(&report, path)?;
+    }
     if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
         return Ok(render::exit_code(&report, fail_on));

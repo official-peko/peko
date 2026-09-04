@@ -41,7 +41,19 @@ fn lint_sends_the_files_and_fails_on_an_error_finding() {
     let key = "lint";
 
     let code = with_key(key, || {
-        peko_cli::lint(&root, true, "HEAD", None, false, "error", true).expect("lint runs")
+        peko_cli::lint(
+            &root,
+            &peko_cli::LintOptions {
+                all: true,
+                since: "HEAD",
+                platform: None,
+                json: false,
+                sarif: None,
+                fail_on: "error",
+                allow_undecided: true,
+            },
+        )
+        .expect("lint runs")
     });
     assert_eq!(code, 1, "an error finding must fail the run");
 
@@ -78,7 +90,19 @@ fn lint_passes_when_nothing_is_wrong() {
     let key = "lint-clean";
 
     let code = with_key(key, || {
-        peko_cli::lint(&root, true, "HEAD", None, false, "error", false).expect("runs")
+        peko_cli::lint(
+            &root,
+            &peko_cli::LintOptions {
+                all: true,
+                since: "HEAD",
+                platform: None,
+                json: false,
+                sarif: None,
+                fail_on: "error",
+                allow_undecided: false,
+            },
+        )
+        .expect("runs")
     });
     assert_eq!(code, 0);
 }
@@ -100,7 +124,19 @@ fn lint_fails_on_an_unanswered_fact_unless_told_otherwise() {
     let root = project("lint-undecided", &server.url(), &files());
     let key = "lint-undecided";
     let strict = with_key(key, || {
-        peko_cli::lint(&root, true, "HEAD", None, false, "error", false).expect("runs")
+        peko_cli::lint(
+            &root,
+            &peko_cli::LintOptions {
+                all: true,
+                since: "HEAD",
+                platform: None,
+                json: false,
+                sarif: None,
+                fail_on: "error",
+                allow_undecided: false,
+            },
+        )
+        .expect("runs")
     });
     assert_eq!(strict, 1, "an unanswered fact must fail by default");
 
@@ -108,7 +144,19 @@ fn lint_fails_on_an_unanswered_fact_unless_told_otherwise() {
     let root = project("lint-allowed", &server.url(), &files());
     let key = "lint-allowed";
     let relaxed = with_key(key, || {
-        peko_cli::lint(&root, true, "HEAD", None, false, "error", true).expect("runs")
+        peko_cli::lint(
+            &root,
+            &peko_cli::LintOptions {
+                all: true,
+                since: "HEAD",
+                platform: None,
+                json: false,
+                sarif: None,
+                fail_on: "error",
+                allow_undecided: true,
+            },
+        )
+        .expect("runs")
     });
     assert_eq!(relaxed, 0, "--allow-undecided must take the failure back");
 }
@@ -124,7 +172,19 @@ fn lint_turns_a_server_error_into_the_message_a_person_reads() {
     let key = "lint-refused";
 
     let error = with_key(key, || {
-        peko_cli::lint(&root, true, "HEAD", None, false, "error", false).expect_err("must fail")
+        peko_cli::lint(
+            &root,
+            &peko_cli::LintOptions {
+                all: true,
+                since: "HEAD",
+                platform: None,
+                json: false,
+                sarif: None,
+                fail_on: "error",
+                allow_undecided: false,
+            },
+        )
+        .expect_err("must fail")
     });
     assert!(
         error.to_string().contains("100 of these a day"),
@@ -147,8 +207,19 @@ fn lint_without_a_key_runs_here_and_sends_nothing() {
     let root = project("lint-nokey", &server.url(), &files());
     std::env::remove_var(support::key_var("lint-nokey"));
 
-    let code = peko_cli::lint(&root, true, "HEAD", None, false, "error", false)
-        .expect("a run with no key still works");
+    let code = peko_cli::lint(
+        &root,
+        &peko_cli::LintOptions {
+            all: true,
+            since: "HEAD",
+            platform: None,
+            json: false,
+            sarif: None,
+            fail_on: "error",
+            allow_undecided: false,
+        },
+    )
+    .expect("a run with no key still works");
     assert_eq!(code, 1, "the fixture holds an error finding");
 
     // A local run does reach the server, to ask for a newer rule database.

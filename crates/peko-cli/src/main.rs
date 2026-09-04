@@ -35,6 +35,13 @@ enum Command {
         /// Print the report as JSON.
         #[arg(long)]
         json: bool,
+        /// Write the report as SARIF to this file.
+        ///
+        /// Upload it with github/codeql-action/upload-sarif and every finding
+        /// lands on the line it belongs to, in the pull request diff. A report
+        /// somebody has to go and read is a report nobody reads.
+        #[arg(long)]
+        sarif: Option<std::path::PathBuf>,
         /// The severity that makes this command exit non zero.
         #[arg(long, default_value = "error")]
         fail_on: String,
@@ -130,16 +137,20 @@ fn run() -> Result<i32> {
             since,
             platform,
             json,
+            sarif,
             fail_on,
             allow_undecided,
         } => lint(
             &path,
-            all,
-            &since,
-            platform.as_deref(),
-            json,
-            &fail_on,
-            allow_undecided,
+            &peko_cli::LintOptions {
+                all,
+                since: &since,
+                platform: platform.as_deref(),
+                json,
+                sarif: sarif.as_deref(),
+                fail_on: &fail_on,
+                allow_undecided,
+            },
         ),
         Command::Init { path, platform } => init(&path, platform.as_deref()),
         Command::Facts { path, write } => facts(&path, write),
