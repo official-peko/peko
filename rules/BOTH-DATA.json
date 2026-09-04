@@ -1,0 +1,189 @@
+[
+  {
+    "category": "DATA",
+    "changelog": [
+      {
+        "change": "Compiled from us-coppa-rule section 312.5 at document version 20260901T214456139Z-38cfbf7a. Model confidence 0.65. Awaiting human review.",
+        "date": "2026-09-01T21:50:50.850964Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T21:50:50.850964Z",
+    "description": "A child-directed app may collect a persistent identifier without parental consent only when the identifier supports internal operations. Use of advertising identifiers or cross-app tracking APIs indicates collection that goes beyond internal operations and requires verifiable parental consent.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US",
+          "when": "fact_contains"
+        },
+        {
+          "key": "kids_category",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": false,
+            "exclude": [
+              "**/Tests/**",
+              "**/test/**",
+              "**/androidTest/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.kt",
+              "**/*.java"
+            ],
+            "pattern": "ASIdentifierManager|advertisingIdentifier|ATTrackingManager|AdvertisingIdClient|getAdvertisingIdInfo"
+          }
+        },
+        {
+          "check_type": "manifest_key_contains",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "value": "com.google.android.gms.permission.AD_ID"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "manifest"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Reading an advertising identifier in a child-directed app is collection of a persistent identifier for a purpose other than internal operations and therefore requires prior verifiable parental consent.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The identifier is read only for frequency capping or fraud prevention, which may qualify as support for internal operations.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Delete calls to ASIdentifierManager.shared().advertisingIdentifier and remove NSUserTrackingUsageDescription",
+        "Add <uses-permission android:name=\"com.google.android.gms.permission.AD_ID\" tools:node=\"remove\" /> to the kids flavor manifest"
+      ],
+      "forum_insights": [],
+      "summary": "Remove advertising identifier access and the AD_ID permission from a child-directed build, or gate the code behind a completed verifiable parental consent."
+    },
+    "rule_id": "BOTH-DATA-002",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "us-coppa-rule",
+      "document_version": "20260901T214456139Z-38cfbf7a",
+      "section": "312.5",
+      "url": "https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-312#p-312.5"
+    },
+    "status": "validated",
+    "title": "Advertising identifiers in a kids app need parental consent",
+    "updated_at": "2026-09-01T21:50:50.850964Z",
+    "version": 1
+  },
+  {
+    "category": "DATA",
+    "changelog": [
+      {
+        "change": "Compiled from us-coppa-rule section 312.10 at document version 20260901T214456139Z-38cfbf7a. Model confidence 0.35. Awaiting human review.",
+        "date": "2026-09-01T21:53:53.838424Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T21:53:53.838424Z",
+    "description": "Configuration or code that sets retention, expiry, or TTL to forever, never, unlimited, or a disabled value conflicts with the ban on indefinite retention of children's personal information.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US",
+          "when": "fact_contains"
+        },
+        {
+          "key": "kids_category",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Pods/**",
+              "**/node_modules/**",
+              "**/build/**",
+              "**/*Tests*/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.{swift,kt,java,ts,js,json,yaml,yml,plist,xml}"
+            ],
+            "pattern": "(retention|retain|expir\\w*|ttl|purge)\\s*[:=][^\\n]{0,40}(forever|never|infinite|indefinite|unlimited|no[_ -]?limit|null|-1|0)\\b"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "config"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Any explicit setting that disables expiry for stored user data violates the indefinite-retention ban.",
+        "likelihood": "medium"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The match concerns non-personal data such as a cache or a feature flag and is harmless.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Change `dataRetentionDays = -1` to `dataRetentionDays = 365`.",
+        "Set Firebase Analytics data retention to a bounded period instead of 'never expire' for user-level data."
+      ],
+      "forum_insights": [],
+      "summary": "Replace unlimited or disabled retention settings with a finite retention window for any store that holds children's personal information."
+    },
+    "rule_id": "BOTH-DATA-006",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "us-coppa-rule",
+      "document_version": "20260901T214456139Z-38cfbf7a",
+      "section": "312.10",
+      "url": "https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-312#p-312.10"
+    },
+    "status": "validated",
+    "title": "No configuration that retains children's data indefinitely",
+    "updated_at": "2026-09-01T21:53:53.838424Z",
+    "version": 1
+  }
+]

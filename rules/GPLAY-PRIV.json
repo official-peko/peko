@@ -1,0 +1,110 @@
+[
+  {
+    "category": "PRIV",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that targets Android 13 or later and reads the advertising ID must declare com.google.android.gms.permission.AD_ID. Without the permission the app receives a string of zeros, and the Play Console data safety form must still disclose the use.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "api_usage",
+          "parameters": {
+            "include": [
+              "**/*.kt",
+              "**/*.java"
+            ],
+            "symbol": "\\bAdvertisingIdClient\\b"
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"com.google.android.gms.permission.AD_ID\" />"
+      ],
+      "summary": "Declare com.google.android.gms.permission.AD_ID in AndroidManifest.xml, and disclose the advertising ID in the Play Console data safety form."
+    },
+    "rule_id": "GPLAY-PRIV-001",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-advertising-id",
+      "document_version": "2026-08-31",
+      "section": "Advertising ID",
+      "url": "https://support.google.com/googleplay/android-developer/answer/6048248"
+    },
+    "status": "validated",
+    "title": "The advertising ID is read without the AD_ID permission",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Seeded with the dependency knowledge base on 2026-09-01.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-09-01T00:00:00Z",
+    "description": "An app that includes an advertising or attribution SDK reads the advertising ID. On Android 13 and later the app must declare com.google.android.gms.permission.AD_ID, and the Play Console data safety form must disclose the use.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "manifest_key_contains",
+            "parameters": {
+              "file": "android_manifest",
+              "key": "manifest.uses-permission[].@android:name",
+              "value": "com.google.android.gms.permission.AD_ID"
+            }
+          },
+          "when": "check_fails"
+        }
+      ],
+      "mechanical_checks": [
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "gradle"
+            ],
+            "flag_type": "tracking"
+          }
+        }
+      ],
+      "targets": [
+        "dependency",
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"com.google.android.gms.permission.AD_ID\" />"
+      ],
+      "forum_insights": [],
+      "summary": "Declare com.google.android.gms.permission.AD_ID, and disclose the advertising ID in the data safety form."
+    },
+    "rule_id": "GPLAY-PRIV-002",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-advertising-id",
+      "document_version": "2026-09-01",
+      "section": "Advertising ID",
+      "url": "https://support.google.com/googleplay/android-developer/answer/6048248"
+    },
+    "status": "validated",
+    "title": "A tracking SDK ships without the advertising ID permission",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 1
+  }
+]

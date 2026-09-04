@@ -1,0 +1,2643 @@
+[
+  {
+    "package_id": "swift-package:Amplitude-Swift",
+    "package_name": "Amplitude",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects behavioral events tied to a user or device identifier. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:a-star",
+    "package_name": "a-star",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:abseil-cpp-binary",
+    "package_name": "abseil-cpp-binary",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:adjust-ios-sdk",
+    "package_name": "Adjust",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs, and reads device identifiers to match a user across apps. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:aidokurunner",
+    "package_name": "aidokurunner",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:airship-mobile-framework",
+    "package_name": "Airship",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends push notifications, and records user attributes. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:alamofire",
+    "package_name": "alamofire",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:alamofireimage",
+    "package_name": "alamofireimage",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:alertkit",
+    "package_name": "alertkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:analytics-swift",
+    "package_name": "analytics-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/segmentio/analytics-swift/blob/main/Sources/Segment/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "app _name",
+        "purpose": "developer_advertising",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/segmentio/analytics-swift/blob/main/Sources/Segment/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "app _version",
+        "purpose": "developer_advertising",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/segmentio/analytics-swift/blob/main/Sources/Segment/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "developer_advertising",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/segmentio/analytics-swift/blob/main/Sources/Segment/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:apollo-ios",
+    "package_name": "apollo-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:app-check",
+    "package_name": "app-check",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:appauth-ios",
+    "package_name": "appauth-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:appcenter",
+    "package_name": "appcenter",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/microsoft/appcenter-sdk-apple/blob/develop/AppCenter/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:apple-toolbox",
+    "package_name": "apple-toolbox",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:appsflyerframework",
+    "package_name": "AppsFlyer",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs, and reads device identifiers to match a user across apps. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:automattic-tracks-ios",
+    "package_name": "automattic-tracks-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:automatticabout-swift",
+    "package_name": "automatticabout-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:azteceditor-ios",
+    "package_name": "azteceditor-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:barebonesbrowser",
+    "package_name": "barebonesbrowser",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:base32",
+    "package_name": "base32",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:bloom_cpp",
+    "package_name": "bloom_cpp",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:bluesocket",
+    "package_name": "bluesocket",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:bodega",
+    "package_name": "bodega",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:braze-segment-swift",
+    "package_name": "braze-segment-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:braze-swift-sdk",
+    "package_name": "braze-swift-sdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "user_id",
+        "purpose": "product_personalization",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "user_id",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "user_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "product_personalization",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "product_personalization",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "app_functionality",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/braze-inc/braze-swift-sdk/blob/main/Sources/BrazeKitResources/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:browserserviceskit",
+    "package_name": "browserserviceskit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:bugsnag-cocoa",
+    "package_name": "Bugsnag",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends crash reports that carry device and session data. The app must disclose diagnostic collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:buttonkit",
+    "package_name": "buttonkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:charts",
+    "package_name": "charts",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:cloudkitsyncmonitor",
+    "package_name": "cloudkitsyncmonitor",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:cocoalumberjack",
+    "package_name": "cocoalumberjack",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:codescanner",
+    "package_name": "codescanner",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:color-studio",
+    "package_name": "color-studio",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:colorful",
+    "package_name": "colorful",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:combine-schedulers",
+    "package_name": "combine-schedulers",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:commonui_sdk_ios",
+    "package_name": "commonui_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:confettiswiftui",
+    "package_name": "confettiswiftui",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:content-scope-scripts",
+    "package_name": "content-scope-scripts",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:core_sdk_ios",
+    "package_name": "core_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/zendesk/core_sdk_ios/blob/master/ZendeskCoreSDK.xcframework/ios-arm64/ZendeskCoreSDK.framework/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:crookedtext",
+    "package_name": "crookedtext",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:danger-swift-coverage",
+    "package_name": "danger-swift-coverage",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:deprecatedapi",
+    "package_name": "deprecatedapi",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:designresourceskit",
+    "package_name": "designresourceskit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:dip",
+    "package_name": "dip",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:down",
+    "package_name": "down",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:dropdown",
+    "package_name": "dropdown",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:duckduckgo-autofill",
+    "package_name": "duckduckgo-autofill",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:easytipview",
+    "package_name": "easytipview",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:emojitext",
+    "package_name": "emojitext",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:facebook-ios-sdk",
+    "package_name": "facebook-ios-sdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:favicon",
+    "package_name": "favicon",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:filepicker",
+    "package_name": "filepicker",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:firebase-ios-sdk",
+    "package_name": "firebase-ios-sdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/firebase/firebase-ios-sdk/blob/main/Crashlytics/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/firebase/firebase-ios-sdk/blob/main/Crashlytics/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:fsinteractivemap",
+    "package_name": "fsinteractivemap",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:fuzi",
+    "package_name": "fuzi",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gcdwebserver",
+    "package_name": "gcdwebserver",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gifu",
+    "package_name": "gifu",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:glean",
+    "package_name": "glean",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:glean-swift",
+    "package_name": "glean-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:google-ads-on-device-conversion-ios-sdk",
+    "package_name": "google-ads-on-device-conversion-ios-sdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:googleappmeasurement",
+    "package_name": "googleappmeasurement",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:googledatatransport",
+    "package_name": "googledatatransport",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "analytics",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/google/GoogleDataTransport/blob/main/GoogleDataTransport/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:googlemobileads-ios",
+    "package_name": "Google Mobile Ads",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and reads the advertising identifier for targeting. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "coarse_location",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:googlesignin-ios",
+    "package_name": "Google Sign In",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Signs a user in with a Google account. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "name",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "email_address",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:googleutilities",
+    "package_name": "googleutilities",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gravatar-sdk-ios",
+    "package_name": "gravatar-sdk-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:grdb.swift",
+    "package_name": "grdb.swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gridicons-ios",
+    "package_name": "gridicons-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:grpc-binary",
+    "package_name": "grpc-binary",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gtm-session-fetcher",
+    "package_name": "gtm-session-fetcher",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gutenbergkit",
+    "package_name": "gutenbergkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:gzipswift",
+    "package_name": "gzipswift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:hcaptcha-ios-sdk",
+    "package_name": "hcaptcha-ios-sdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "product_interaction",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/hCaptcha/HCaptcha-ios-sdk/blob/master/HCaptcha/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:hoshidicts",
+    "package_name": "hoshidicts",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:interop-ios-for-google-sdks",
+    "package_name": "interop-ios-for-google-sdks",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:ios-branch-deep-linking-attribution",
+    "package_name": "Branch",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs through deep links, and reads device identifiers. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:ios-js-support",
+    "package_name": "ios-js-support",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:isscrolling",
+    "package_name": "isscrolling",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:jsonsafeencoding-swift",
+    "package_name": "jsonsafeencoding-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:jwt-kit",
+    "package_name": "jwt-kit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kanna",
+    "package_name": "kanna",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:keychain-swift",
+    "package_name": "keychain-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:keychainaccess",
+    "package_name": "keychainaccess",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kickstarter-prelude",
+    "package_name": "kickstarter-prelude",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kickstarter-reactiveextensions",
+    "package_name": "kickstarter-reactiveextensions",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kif",
+    "package_name": "kif",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kingfisher",
+    "package_name": "kingfisher",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:kingfisherwebp",
+    "package_name": "kingfisherwebp",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:launchatlogin",
+    "package_name": "launchatlogin",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:leveldb",
+    "package_name": "leveldb",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:libcmark_gfm",
+    "package_name": "libcmark_gfm",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:libssh2prebuild",
+    "package_name": "libssh2prebuild",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:libwebp-xcode",
+    "package_name": "libwebp-xcode",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:logger",
+    "package_name": "logger",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:lottie-ios",
+    "package_name": "lottie-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:lottie-spm",
+    "package_name": "lottie-spm",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:lrucache",
+    "package_name": "lrucache",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:lucidbanner",
+    "package_name": "lucidbanner",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:mantis",
+    "package_name": "mantis",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:mappamundi",
+    "package_name": "mappamundi",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:markdownkit",
+    "package_name": "markdownkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:mediaeditor-ios",
+    "package_name": "mediaeditor-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:messaging_sdk_ios",
+    "package_name": "messaging_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:messagingapi_sdk_ios",
+    "package_name": "messagingapi_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:mixpanel-swift",
+    "package_name": "Mixpanel",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects behavioral events tied to a user or device identifier. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:modifiedcopymacro",
+    "package_name": "modifiedcopymacro",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:nanopb",
+    "package_name": "nanopb",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:networkimage",
+    "package_name": "networkimage",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:nextcloudkit",
+    "package_name": "nextcloudkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:nsobject-safeexpectations",
+    "package_name": "nsobject-safeexpectations",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:nsurl-idn",
+    "package_name": "nsurl-idn",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:nuke",
+    "package_name": "nuke",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:objective-git-swift-package",
+    "package_name": "objective-git-swift-package",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:objectivepgp",
+    "package_name": "objectivepgp",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:ocmock",
+    "package_name": "ocmock",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:octokit.swift",
+    "package_name": "octokit.swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:ohhttpstubs",
+    "package_name": "ohhttpstubs",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:onesignal-xcframework",
+    "package_name": "OneSignal",
+    "ecosystem": "swift_package",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends push notifications, and records a device identifier and segments. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "swift-package:onetimepassword",
+    "package_name": "onetimepassword",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:opencastswift",
+    "package_name": "opencastswift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:openssl",
+    "package_name": "openssl",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:plcrashreporter",
+    "package_name": "plcrashreporter",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/microsoft/PLCrashReporter/blob/master/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/microsoft/PLCrashReporter/blob/master/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:popovers",
+    "package_name": "popovers",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:popupview",
+    "package_name": "popupview",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:privacy-dashboard",
+    "package_name": "privacy-dashboard",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:promises",
+    "package_name": "promises",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:pulse",
+    "package_name": "pulse",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:punycodeswift",
+    "package_name": "punycodeswift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:purchases-ios-spm",
+    "package_name": "purchases-ios-spm",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:qrcodereader.swift",
+    "package_name": "qrcodereader.swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:reactiveswift",
+    "package_name": "reactiveswift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:realm-core",
+    "package_name": "realm-core",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:realm-swift",
+    "package_name": "realm-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:requestkit",
+    "package_name": "requestkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:rncryptor",
+    "package_name": "rncryptor",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:rxswift",
+    "package_name": "rxswift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sdk-swift",
+    "package_name": "sdk-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sdkconfigurations_sdk_ios",
+    "package_name": "sdkconfigurations_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sdwebimage",
+    "package_name": "sdwebimage",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sentry",
+    "package_name": "sentry",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "performance_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sentry-cocoa",
+    "package_name": "sentry-cocoa",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "performance_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/getsentry/sentry-cocoa/blob/main/Sources/Resources/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sfsafesymbols",
+    "package_name": "sfsafesymbols",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:shout",
+    "package_name": "shout",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:snapkit",
+    "package_name": "snapkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:socket",
+    "package_name": "socket",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sovran-swift",
+    "package_name": "sovran-swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sqlite.swift",
+    "package_name": "sqlite.swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:starscream",
+    "package_name": "starscream",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:statsig-kit",
+    "package_name": "statsig-kit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/statsig-io/statsig-kit/blob/main/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/statsig-io/statsig-kit/blob/main/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:stripe-ios-spm",
+    "package_name": "stripe-ios-spm",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:support_providers_sdk_ios",
+    "package_name": "support_providers_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "customer_support",
+        "purpose": "app_functionality",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/zendesk/support_providers_sdk_ios/blob/master/SupportProvidersSDK.xcframework/ios-arm64/SupportProvidersSDK.framework/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "user_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/zendesk/support_providers_sdk_ios/blob/master/SupportProvidersSDK.xcframework/ios-arm64/SupportProvidersSDK.framework/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "analytics",
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/zendesk/support_providers_sdk_ios/blob/master/SupportProvidersSDK.xcframework/ios-arm64/SupportProvidersSDK.framework/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:support_sdk_ios",
+    "package_name": "support_sdk_ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:svgview",
+    "package_name": "svgview",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:svprogresshud",
+    "package_name": "svprogresshud",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift",
+    "package_name": "swift",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-argument-parser",
+    "package_name": "swift-argument-parser",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-asn1",
+    "package_name": "swift-asn1",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-atomics",
+    "package_name": "swift-atomics",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-case-paths",
+    "package_name": "swift-case-paths",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-certificates",
+    "package_name": "swift-certificates",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-cgit2",
+    "package_name": "swift-cgit2",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-clocks",
+    "package_name": "swift-clocks",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-cmark",
+    "package_name": "swift-cmark",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-collections",
+    "package_name": "swift-collections",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-composable-architecture",
+    "package_name": "swift-composable-architecture",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-concurrency-extras",
+    "package_name": "swift-concurrency-extras",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-crypto",
+    "package_name": "swift-crypto",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-custom-dump",
+    "package_name": "swift-custom-dump",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-dependencies",
+    "package_name": "swift-dependencies",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-git",
+    "package_name": "swift-git",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-identified-collections",
+    "package_name": "swift-identified-collections",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-log",
+    "package_name": "swift-log",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-markdown",
+    "package_name": "swift-markdown",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-markdown-ui",
+    "package_name": "swift-markdown-ui",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-navigation",
+    "package_name": "swift-navigation",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-nio",
+    "package_name": "swift-nio",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-nio-ssl",
+    "package_name": "swift-nio-ssl",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-perception",
+    "package_name": "swift-perception",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-protobuf",
+    "package_name": "swift-protobuf",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-sharing",
+    "package_name": "swift-sharing",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-snapshot-testing",
+    "package_name": "swift-snapshot-testing",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-sodium",
+    "package_name": "swift-sodium",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-syntax",
+    "package_name": "swift-syntax",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-system",
+    "package_name": "swift-system",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swift-toolchain-sqlite",
+    "package_name": "swift-toolchain-sqlite",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftcommonmark",
+    "package_name": "swiftcommonmark",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftdraw",
+    "package_name": "swiftdraw",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swifter",
+    "package_name": "swifter",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftformat",
+    "package_name": "swiftformat",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftlintplugins",
+    "package_name": "swiftlintplugins",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftprotobuf",
+    "package_name": "swiftprotobuf",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftrichstring",
+    "package_name": "swiftrichstring",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftsdk",
+    "package_name": "swiftsdk",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/TelemetryDeck/SwiftSDK/blob/main/Sources/TelemetryDeck/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/TelemetryDeck/SwiftSDK/blob/main/Sources/TelemetryDeck/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftsoup",
+    "package_name": "swiftsoup",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftui-introspect",
+    "package_name": "swiftui-introspect",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftuipager",
+    "package_name": "swiftuipager",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftybeaver",
+    "package_name": "swiftybeaver",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "other_diagnostic_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/SwiftyBeaver/SwiftyBeaver/blob/master/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftyjson",
+    "package_name": "swiftyjson",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftyopencc",
+    "package_name": "swiftyopencc",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftyuserdefaults",
+    "package_name": "swiftyuserdefaults",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swiftyxmlparser",
+    "package_name": "swiftyxmlparser",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swipecellkit",
+    "package_name": "swipecellkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:swordrpc",
+    "package_name": "swordrpc",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:sync_crypto",
+    "package_name": "sync_crypto",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:taglistview",
+    "package_name": "taglistview",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:telemetrydeck",
+    "package_name": "telemetrydeck",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/TelemetryDeck/SwiftClient/blob/main/Sources/TelemetryDeck/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/TelemetryDeck/SwiftClient/blob/main/Sources/TelemetryDeck/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:texture",
+    "package_name": "texture",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:tlphotopicker",
+    "package_name": "tlphotopicker",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:tocropviewcontroller",
+    "package_name": "tocropviewcontroller",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:trackerradarkit",
+    "package_name": "trackerradarkit",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:ttprogresshud",
+    "package_name": "ttprogresshud",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:uideviceidentifier",
+    "package_name": "uideviceidentifier",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:uiimagecolors",
+    "package_name": "uiimagecolors",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:version",
+    "package_name": "version",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:viewanimator",
+    "package_name": "viewanimator",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:viewinspector",
+    "package_name": "viewinspector",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:vlckit-spm",
+    "package_name": "vlckit-spm",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wasm3",
+    "package_name": "wasm3",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:waterfallgrid",
+    "package_name": "waterfallgrid",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wireguard-apple",
+    "package_name": "wireguard-apple",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wishkit-ios",
+    "package_name": "wishkit-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [
+      {
+        "data_type": "user_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/wishkit/wishkit-ios/blob/main/Sources/WishKit/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/wishkit/wishkit-ios/blob/main/Sources/WishKit/PrivacyInfo.xcprivacy"
+      },
+      {
+        "data_type": "other_user_content",
+        "purpose": "app_functionality",
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "provenance": "apple_privacy_manifest",
+        "source_url": "https://github.com/wishkit/wishkit-ios/blob/main/Sources/WishKit/PrivacyInfo.xcprivacy"
+      }
+    ],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wishkit-ios-shared",
+    "package_name": "wishkit-ios-shared",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wordpress-rs",
+    "package_name": "wordpress-rs",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wpxmlrpc",
+    "package_name": "wpxmlrpc",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:wrappinghstack",
+    "package_name": "wrappinghstack",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:xctest-dynamic-overlay",
+    "package_name": "xctest-dynamic-overlay",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:yubikit-ios",
+    "package_name": "yubikit-ios",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:ziparchive",
+    "package_name": "ziparchive",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:zipfoundation",
+    "package_name": "zipfoundation",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "curated",
+    "last_updated": "2026-09-03T19:47:03Z"
+  },
+  {
+    "package_id": "swift-package:zstd",
+    "package_name": "zstd",
+    "ecosystem": "swift_package",
+    "compliance_flags": [],
+    "required_privacy_declarations": [],
+    "declarations_state": "no_manifest_published",
+    "last_updated": "2026-09-03T19:47:03Z"
+  }
+]

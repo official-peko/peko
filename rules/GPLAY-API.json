@@ -1,0 +1,175 @@
+[
+  {
+    "category": "API",
+    "changelog": [
+      {
+        "change": "Seed rule set to API level 35. The policy scraper must update this value when Google Play raises the requirement.",
+        "date": "2026-08-31T00:00:00Z"
+      },
+      {
+        "change": "Repointed. The rule cited \"Target API level requirements for Google Play apps\", which is the page name, not a heading on it. A person chose the real top heading of the same document.",
+        "date": "2026-09-03T03:47:45Z"
+      },
+      {
+        "change": "Gated on submitting_to_store. The rule fired on 41 of 346 published apps, and every one of them is listed on Google Play today. The floor blocks a submission, not a listing, so an error on a shipped app was a false positive.",
+        "date": "2026-09-04T03:55:38Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "Google Play blocks a submission and an update whose target API level is below the current requirement. It does not remove an app already listed, so this applies to a build you are about to upload and not to one that already ships. The requirement rises every year, so this rule holds a version number that the rule pipeline must keep current.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "submitting_to_store",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "mechanical_checks": [
+        {
+          "check_type": "config_value",
+          "parameters": {
+            "file": "build_gradle",
+            "match": "min_int",
+            "required": false,
+            "setting": "targetSdk",
+            "value": 35
+          }
+        },
+        {
+          "check_type": "config_value",
+          "parameters": {
+            "file": "build_gradle",
+            "match": "min_int",
+            "required": false,
+            "setting": "targetSdkVersion",
+            "value": 35
+          }
+        }
+      ],
+      "targets": [
+        "config"
+      ]
+    },
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "android {\n    defaultConfig {\n        targetSdk = 35\n    }\n}"
+      ],
+      "summary": "Raise targetSdk to the level that Google Play requires, then test the behavior changes that the new level introduces."
+    },
+    "rule_id": "GPLAY-API-001",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "google-play-target-api-level-requirements",
+      "document_version": "2026-08-31",
+      "section": "Meet Google Play's target API level requirement",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk"
+    },
+    "status": "validated",
+    "title": "The target API level is below the Google Play minimum",
+    "updated_at": "2026-09-04T03:55:38Z",
+    "version": 3
+  },
+  {
+    "category": "API",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-target-api-level-requirements section Meet Google Play's target API level requirement at document version 20260901T173614601Z-35c84aed. Model confidence 0.40. Awaiting human review.",
+        "date": "2026-09-01T18:09:04.115022Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification lowered the severity from error to warning, because the check cannot support the stronger claim.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule understated and named no fix that a pass can apply. A person must read it. Split the rule into separate checks based on app_type (new vs existing) and platform (Wear OS/Automotive/TV/XR/standard), each requiring the correct minimum API level (36 for new standard apps, 35 for existing apps, 35 for new Wear OS/Automotive, 34 for new TV/XR), rather than a single flat minimum of 35.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule and named a fix that no pass could apply. Corrected by hand: one flat minimum cannot express four different floors.",
+        "date": "2026-09-01T22:41:27Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T02:15:06Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:04.115022Z",
+    "description": "The app's targetSdkVersion must meet Google Play's minimum required API level, which depends on app type and submission date. New apps/updates generally need API 36+, with exceptions for Wear OS/Automotive (35+) and TV/XR (34+). Existing apps need at least API 35 to remain available to new users on newer Android versions. The floor here is the one for an existing app. A new standard app needs 36, and a new TV or XR app needs 34. Nothing in a repository says which of those an app is, so this check reads the level that holds for every existing app and reports no app wrongly.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "permanently_private_app",
+          "value": false,
+          "when": "fact_equals"
+        },
+        {
+          "key": "tv_or_xr_app",
+          "value": false,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "config_value",
+          "parameters": {
+            "file": "build_gradle",
+            "match": "min_int",
+            "required": true,
+            "setting": "targetSdkVersion",
+            "value": 35
+          }
+        }
+      ],
+      "targets": [
+        "config"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Checker enforces the general-purpose app minimum (API 35) as a baseline; exact required level varies by app category (Wear OS, TV, Automotive, XR) and by submission date, which a mechanical check cannot fully resolve.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The rule could instead require API 36 for new apps depending on submission timing relative to August 31 2026 deadline.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "android { defaultConfig { targetSdkVersion 35 } }"
+      ],
+      "forum_insights": [],
+      "summary": "Update the app's targetSdkVersion in build.gradle to at least API level 35 (or higher per app type/date requirements) before uploading to Google Play."
+    },
+    "rule_id": "GPLAY-API-004",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "google-play-target-api-level-requirements",
+      "document_version": "20260901T173614601Z-35c84aed",
+      "section": "Meet Google Play's target API level requirement",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk"
+    },
+    "status": "validated",
+    "title": "App must target minimum required Android API level",
+    "updated_at": "2026-09-01T18:09:04.115022Z",
+    "version": 1
+  }
+]

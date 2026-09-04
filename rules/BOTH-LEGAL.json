@@ -1,0 +1,165 @@
+[
+  {
+    "category": "LEGAL",
+    "changelog": [
+      {
+        "change": "Compiled from eu-gdpr section 8 at document version 20260901T184955084Z-c63a1759. Model confidence 0.30. Awaiting human review.",
+        "date": "2026-09-01T18:53:31.615677Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:53:31.615677Z",
+    "description": "Confirm that the developer has documented reasonable efforts to verify parental consent for children's data processing, as this is a business/process fact not derivable from code.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "eu",
+          "when": "fact_contains"
+        },
+        {
+          "key": "kids_category",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_present",
+          "parameters": {
+            "file": "privacy_manifest",
+            "key": "parental_consent_verification_method"
+          }
+        }
+      ],
+      "targets": [
+        "config",
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Add a 'parental_consent_verification_method' field to your compliance declaration describing your verification approach."
+      ],
+      "forum_insights": [],
+      "summary": "Declare the method used to verify parental consent (e.g., verified email, credit card check, ID verification) in the app's compliance configuration."
+    },
+    "rule_id": "BOTH-LEGAL-003",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "eu-gdpr",
+      "document_version": "20260901T184955084Z-c63a1759",
+      "section": "8",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679"
+    },
+    "status": "validated",
+    "title": "Declare data retention / parental consent verification policy fact for EU child data processing",
+    "updated_at": "2026-09-01T18:53:31.615677Z",
+    "version": 1
+  },
+  {
+    "category": "LEGAL",
+    "changelog": [
+      {
+        "change": "Compiled from us-ccpa-regulations section 7011 at document version 20260901T214500738Z-97cfc41e. Model confidence 0.55. Awaiting human review.",
+        "date": "2026-09-01T22:01:20.358379Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T22:01:20.358379Z",
+    "description": "An app distributed to California consumers must have a privacy policy that is posted online and reachable from the app. The project should reference a privacy policy URL or screen somewhere in its source, resources, or store metadata.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US-CA",
+          "when": "fact_contains"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Pods/**",
+              "**/node_modules/**",
+              "**/build/**"
+            ],
+            "expect_present": true,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.kt",
+              "**/*.java",
+              "**/*.xml",
+              "**/*.plist",
+              "**/*.json",
+              "**/*.strings",
+              "**/*.js",
+              "**/*.ts",
+              "**/*.dart",
+              "**/*.md",
+              "**/*.html"
+            ],
+            "pattern": "privacy[\\s_\\-]?policy|privacyPolicy|privacy_policy"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "config",
+        "manifest",
+        "asset"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Any reference to a privacy policy URL or screen in the project satisfies the minimum evidence that a policy exists and is linked.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The privacy policy may live only in the store listing, so an app with no in-code reference could still comply.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Add a constant such as let privacyPolicyURL = URL(string: \"https://example.com/privacy\")! and open it from a Settings row.",
+        "Add <string name=\"privacy_policy_url\">https://example.com/privacy</string> to strings.xml and link it from the settings screen."
+      ],
+      "forum_insights": [],
+      "summary": "Publish a privacy policy online and reference its URL from the app and the store listing."
+    },
+    "rule_id": "BOTH-LEGAL-016",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "us-ccpa-regulations",
+      "document_version": "20260901T214500738Z-97cfc41e",
+      "section": "7011",
+      "url": "https://cppa.ca.gov/regulations/consumer_privacy_act.html"
+    },
+    "status": "validated",
+    "title": "App must reference a posted privacy policy (CCPA Section7011)",
+    "updated_at": "2026-09-01T22:01:20.358379Z",
+    "version": 1
+  }
+]

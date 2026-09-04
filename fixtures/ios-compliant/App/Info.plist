@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.pekoui.sample</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Sample scans a receipt with the camera so that you do not type it by hand.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sample attaches a photo from your library to an expense report.</string>
+</dict>
+</plist>

@@ -1,0 +1,58 @@
+[
+  {
+    "category": "MINOR",
+    "changelog": [
+      {
+        "change": "Seeded with the dependency knowledge base on 2026-09-01.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-09-01T00:00:00Z",
+    "description": "An app in the Kids Category must not include third party advertising or analytics that tracks a user. Apple removes an app in that category when it ships such an SDK.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "kids_category",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "mechanical_checks": [
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "cocoapods",
+              "swift_package"
+            ],
+            "flag_type": "tracking"
+          }
+        }
+      ],
+      "targets": [
+        "dependency"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "forum_insights": [],
+      "summary": "Remove the advertising and tracking SDKs, or leave the Kids Category."
+    },
+    "rule_id": "AAPL-MINOR-002",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "2026-09-01",
+      "section": "1.3",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#kids-category"
+    },
+    "status": "validated",
+    "title": "A kids app ships a third party tracking or advertising SDK",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 1
+  }
+]

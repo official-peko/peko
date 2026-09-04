@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "platform": "android",
+  "facts": {
+    "submitting_to_store": true
+  },
+  "overrides": []
+}

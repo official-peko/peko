@@ -1,0 +1,44 @@
+# The open half of Peko: everything a user runs on their own machine.
+#
+# The mechanical checker reads files and calls no model, so it needs no
+# server, no key, and no network. That is why it lives here and why the rule
+# database it needs ships with it.
+#
+# What is not here is the pipeline that keeps those rules current, the
+# interpretive tier that reads code with a model, the curated dependency
+# knowledge, and the corpus that proves any of it. Those live in the platform
+# repository.
+[workspace]
+resolver = "2"
+members = [
+    "crates/peko-rules",
+    "crates/peko-parse",
+    "crates/peko-check",
+    "crates/peko-report",
+    "crates/peko-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "Apache-2.0"
+publish = false
+authors = ["Peko UI Technologies LLC"]
+repository = "https://github.com/peko-ui/peko"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

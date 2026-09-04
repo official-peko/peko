@@ -1,0 +1,606 @@
+[
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. Google Play grants this permission with an approved declaration, and three published apps hold one. The finding still asks the developer to confirm the declaration.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "QUERY_ALL_PACKAGES is a restricted permission. Google Play accepts it only for a small set of app types, such as a device search app, an antivirus app, or a file manager. An app that declares it without an approved use is removed.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.QUERY_ALL_PACKAGES"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<queries>\n  <package android:name=\"com.example.partner\" />\n</queries>"
+      ],
+      "summary": "Remove QUERY_ALL_PACKAGES and declare the specific packages in a <queries> element instead."
+    },
+    "rule_id": "GPLAY-PERM-001",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "2026-08-31",
+      "section": "Package (App) Visibility Permission",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10158779"
+    },
+    "status": "validated",
+    "title": "The app declares QUERY_ALL_PACKAGES",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 2
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. Google Play grants this permission with an approved declaration, and three published apps hold one. The finding still asks the developer to confirm the declaration.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "MANAGE_EXTERNAL_STORAGE grants broad access to shared storage. Google Play accepts it only for an app whose core function needs it, such as a file manager or a backup app. Every other app must use the Storage Access Framework or scoped storage.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.MANAGE_EXTERNAL_STORAGE"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [],
+      "summary": "Replace the permission with scoped storage or with the Storage Access Framework."
+    },
+    "rule_id": "GPLAY-PERM-002",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "2026-08-31",
+      "section": "All Files Access Permission",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10467955"
+    },
+    "status": "validated",
+    "title": "The app declares MANAGE_EXTERNAL_STORAGE",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 2
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Gated on the absence of an SMS_DELIVER receiver, which is the default handler shape. The rule carried no precondition at all. The key path was checked against the parser before the rule changed. This does not explain the 6 findings on Kai 9000 and PlainApp: neither declares an SMS_DELIVER receiver, requests ROLE_SMS, or asks to be the default dialer. The rule reads both correctly, and the approved exception Google grants is not visible in code.",
+        "date": "2026-09-04T21:40:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "Google Play restricts the SMS and call log permission group to an app that is the default handler for that function, or to an app with an approved exception. An app that declares one of these permissions without qualifying is refused. A receiver with an SMS_DELIVER intent filter is the default handler shape, so this rule reads the manifest and stays quiet for one. It cannot see an approved exception, which is a grant Google makes outside the code.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "manifest_key_contains",
+            "parameters": {
+              "file": "android_manifest",
+              "key": "manifest.application.receiver[].intent-filter[].action[].@android:name",
+              "value": "android.provider.Telephony.SMS_DELIVER"
+            }
+          },
+          "when": "check_fails"
+        }
+      ],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_regex",
+            "pattern": "^android\\.permission\\.(READ_SMS|RECEIVE_SMS|SEND_SMS|RECEIVE_MMS|RECEIVE_WAP_PUSH|READ_CALL_LOG|WRITE_CALL_LOG|PROCESS_OUTGOING_CALLS)$",
+            "required": false
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [],
+      "summary": "Remove the permission, or apply for a Play Console permissions declaration and set the app as the default handler."
+    },
+    "rule_id": "GPLAY-PERM-003",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "2026-08-31",
+      "section": "SMS and Call Log Permissions",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10208820"
+    },
+    "status": "validated",
+    "title": "The app declares a restricted SMS or call log permission",
+    "updated_at": "2026-09-04T21:38:46Z",
+    "version": 2
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-permissions section Photo and Video Permissions at document version 20260901T173559676Z-52ba10f1. Model confidence 0.80. Awaiting human review.",
+        "date": "2026-09-01T18:09:00.479950Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the check reported every permission that was not one of these.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:00.479950Z",
+    "description": "Detect whether the manifest declares READ_MEDIA_IMAGES or READ_MEDIA_VIDEO permissions, which require justification and a Play Console declaration under Google Play policy.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.READ_MEDIA_IMAGES"
+          }
+        },
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.READ_MEDIA_VIDEO"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "Remove READ_MEDIA_IMAGES/VIDEO from AndroidManifest.xml if not essential.",
+        "If required, prepare documentation for the Play Console Permissions Declaration Form."
+      ],
+      "forum_insights": [],
+      "summary": "If these permissions are declared, verify justification exists and a Play Console declaration has been submitted for sensitive media access."
+    },
+    "rule_id": "GPLAY-PERM-008",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "20260901T173559676Z-52ba10f1",
+      "section": "Photo and Video Permissions",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9888170"
+    },
+    "status": "validated",
+    "title": "Flag presence of READ_MEDIA_IMAGES/VIDEO permissions for review",
+    "updated_at": "2026-09-01T18:09:00.479950Z",
+    "version": 1
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-permissions section All Files Access Permission at document version 20260901T173559676Z-52ba10f1. Model confidence 0.40. Awaiting human review.",
+        "date": "2026-09-01T18:09:00.480526Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the check reported an app that declares no permission at all.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:00.480526Z",
+    "description": "Flag any app that declares the MANAGE_EXTERNAL_STORAGE permission in its manifest so it can be reviewed for compliance with Google Play's All Files Access policy.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.MANAGE_EXTERNAL_STORAGE"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "Remove the permission if it is not essential to core app functionality.",
+        "Document the justification for review before submission."
+      ],
+      "forum_insights": [],
+      "summary": "If MANAGE_EXTERNAL_STORAGE is declared, ensure the app has a valid, disclosed, user-facing justification and passes Play's app review for this permission."
+    },
+    "rule_id": "GPLAY-PERM-013",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "20260901T173559676Z-52ba10f1",
+      "section": "All Files Access Permission",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9888170"
+    },
+    "status": "validated",
+    "title": "Detect declaration of MANAGE_EXTERNAL_STORAGE permission",
+    "updated_at": "2026-09-01T18:09:00.480526Z",
+    "version": 1
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-permissions section Request Install Packages Permission at document version 20260901T173559676Z-52ba10f1. Model confidence 0.40. Awaiting human review.",
+        "date": "2026-09-01T18:09:00.481247Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the check reported an app that declares no permission at all.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:00.481247Z",
+    "description": "Flag any manifest declaration of the REQUEST_INSTALL_PACKAGES permission so it can be reviewed for compliance with Google Play's permitted use policy.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.REQUEST_INSTALL_PACKAGES"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\" /> should only appear if the app installs packages as part of its documented core functionality."
+      ],
+      "forum_insights": [],
+      "summary": "If this permission is declared, ensure it is used strictly for a permitted purpose and disclosed in the Play Console app declaration."
+    },
+    "rule_id": "GPLAY-PERM-019",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "20260901T173559676Z-52ba10f1",
+      "section": "Request Install Packages Permission",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9888170"
+    },
+    "status": "validated",
+    "title": "Detect use of REQUEST_INSTALL_PACKAGES permission for manual review",
+    "updated_at": "2026-09-01T18:09:00.481247Z",
+    "version": 1
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-permissions section Body Sensor Permissions at document version 20260901T173559676Z-52ba10f1. Model confidence 0.45. Awaiting human review.",
+        "date": "2026-09-01T18:09:00.481431Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection and named no fix that a pass can apply. A person must read it. Change the precondition to check that targetSdkVersion is numerically >= 36 (or whatever API level corresponds to Android 16), not just that the key exists.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule and named a fix that no pass could apply. Corrected by hand: the precondition asked whether targetSdkVersion exists, not what it is.",
+        "date": "2026-09-01T22:41:27Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the check reported an app that declares no permission at all.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection and named no fix that a pass can apply. A person must read it. Change the manifest check to match_equals 'android.permission.BODY_SENSORS' (i.e., flag when BODY_SENSORS is present) rather than not_equals.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T02:15:06Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:00.481431Z",
+    "description": "Apps targeting Android 16 or higher must not rely on the legacy android.permission.BODY_SENSORS permission for accessing specific health data types; they must use the granular android.permission.health.* permissions instead.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "config_value",
+            "parameters": {
+              "file": "build_gradle",
+              "match": "min_int",
+              "required": false,
+              "setting": "targetSdkVersion",
+              "value": 36
+            }
+          },
+          "when": "check_passes"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "match": "not_equals",
+            "required": false,
+            "value": "android.permission.BODY_SENSORS"
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Presence of BODY_SENSORS permission alongside a target SDK of 36 or higher indicates the app has not migrated to granular health permissions",
+        "likelihood": "high"
+      }
+    ],
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"android.permission.health.READ_HEART_RATE\" />"
+      ],
+      "forum_insights": [],
+      "summary": "Replace the general BODY_SENSORS permission with the specific android.permission.health.* permission that matches the data type accessed (e.g., READ_HEART_RATE, READ_OXYGEN_SATURATION, READ_SKIN_TEMPERATURE) when targeting Android 16 or higher."
+    },
+    "rule_id": "GPLAY-PERM-020",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-permissions",
+      "document_version": "20260901T173559676Z-52ba10f1",
+      "section": "Body Sensor Permissions",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9888170"
+    },
+    "status": "validated",
+    "title": "Migrate BODY_SENSORS to granular health permissions on Android 16+",
+    "updated_at": "2026-09-01T18:09:00.481431Z",
+    "version": 1
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-target-api-level-requirements section Migrate from Android 11 (API level 30) to Android 12 (API level 31) at document version 20260901T173614601Z-35c84aed. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:09:04.115481Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the key path named a child key that no manifest holds.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection and named no fix that a pass can apply. A person must read it. Precondition should be check_passes on manifest containing ACCESS_FINE_LOCATION permission; violation detection should be check_fails on manifest containing ACCESS_COARSE_LOCATION permission (i.e., flag when COARSE_LOCATION is missing while FINE_LOCATION is present).",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T02:15:06Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:04.115481Z",
+    "description": "Any app requesting ACCESS_FINE_LOCATION must also request ACCESS_COARSE_LOCATION to support users who choose to grant only approximate location.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "manifest_key_value",
+            "parameters": {
+              "file": "android_manifest",
+              "key": "manifest.uses-permission[].@android:name",
+              "match": "not_equals",
+              "required": false,
+              "value": "android.permission.ACCESS_FINE_LOCATION"
+            }
+          },
+          "when": "check_fails"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_contains",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "value": "android.permission.ACCESS_COARSE_LOCATION"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />"
+      ],
+      "forum_insights": [],
+      "summary": "Add a uses-permission entry for ACCESS_COARSE_LOCATION whenever ACCESS_FINE_LOCATION is declared."
+    },
+    "rule_id": "GPLAY-PERM-035",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "google-play-target-api-level-requirements",
+      "document_version": "20260901T173614601Z-35c84aed",
+      "section": "Migrate from Android 11 (API level 30) to Android 12 (API level 31)",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk#pre12"
+    },
+    "status": "validated",
+    "title": "Declare ACCESS_COARSE_LOCATION alongside ACCESS_FINE_LOCATION",
+    "updated_at": "2026-09-01T18:09:04.115481Z",
+    "version": 1
+  },
+  {
+    "category": "PERM",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-target-api-level-requirements section Migrate from Android 9 (API level 28) to Android 10 (API level 29) at document version 20260901T173614601Z-35c84aed. Model confidence 0.55. Awaiting human review.",
+        "date": "2026-09-01T18:09:04.116487Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:04.116487Z",
+    "description": "Apps that post notifications using a full-screen intent must declare the normal permission USE_FULL_SCREEN_INTENT in the manifest. This is not a runtime permission but must still be declared.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "regex_source",
+            "parameters": {
+              "include": [
+                "**/*.java",
+                "**/*.kt"
+              ],
+              "pattern": "setFullScreenIntent\\s*\\("
+            }
+          },
+          "when": "check_fails"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_contains",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.uses-permission[].@android:name",
+            "value": "android.permission.USE_FULL_SCREEN_INTENT"
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<uses-permission android:name=\"android.permission.USE_FULL_SCREEN_INTENT\" />"
+      ],
+      "forum_insights": [],
+      "summary": "Add <uses-permission android:name=\"android.permission.USE_FULL_SCREEN_INTENT\" /> to the manifest when using full-screen intent notifications."
+    },
+    "rule_id": "GPLAY-PERM-038",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "google-play-target-api-level-requirements",
+      "document_version": "20260901T173614601Z-35c84aed",
+      "section": "Migrate from Android 9 (API level 28) to Android 10 (API level 29)",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk#migrate-from-android-9-api-level-28-to-android-10-api-level-29"
+    },
+    "status": "validated",
+    "title": "Declare USE_FULL_SCREEN_INTENT for full-screen intent notifications",
+    "updated_at": "2026-09-01T18:09:04.116487Z",
+    "version": 1
+  }
+]

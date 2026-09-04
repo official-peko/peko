@@ -1,0 +1,146 @@
+[
+  {
+    "category": "DATA",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.5.2 at document version 20260901T052521884Z-f9438536. Model confidence 0.50. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.574639Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.574639Z",
+    "description": "Detects hardcoded absolute filesystem paths that point outside the app's sandbox container, such as /private/var/mobile, /Applications, /System, or /var/mobile/Library. Apps must read and write only inside their designated container (or shared App Group containers).",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": false,
+            "exclude": [
+              "**/Pods/**",
+              "**/*Tests*/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.c",
+              "**/*.cpp"
+            ],
+            "pattern": "\"(/private/var/mobile|/var/mobile/Library|/Applications/|/System/Library|/usr/(bin|lib)|/etc/|/bin/)"
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Use FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first! rather than \"/var/mobile/Library/...\".",
+        "For data shared with an extension, use FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:)."
+      ],
+      "forum_insights": [],
+      "summary": "Use container-relative paths obtained from FileManager instead of hardcoded system paths."
+    },
+    "rule_id": "AAPL-DATA-001",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.5.2",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.5.2"
+    },
+    "status": "validated",
+    "title": "File access outside the app container",
+    "updated_at": "2026-09-01T18:08:59.574639Z",
+    "version": 1
+  },
+  {
+    "category": "DATA",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 5.4 at document version 20260901T052521884Z-f9438536. Model confidence 0.50. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.591399Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.591399Z",
+    "description": "Flags dependencies known to perform user tracking or cross-app data collection, which VPN apps are not permitted to include because they may not disclose user data to third parties.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "ships_vpn",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "cocoapods",
+              "swift_package"
+            ],
+            "flag_type": "tracking"
+          }
+        },
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "cocoapods",
+              "swift_package"
+            ],
+            "flag_type": "data_collection"
+          }
+        }
+      ],
+      "targets": [
+        "dependency"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Remove pod 'FBSDKCoreKit' and pod 'AppsFlyerFramework' from the Podfile and re-run pod install."
+      ],
+      "forum_insights": [],
+      "summary": "Remove tracking and data-collection SDKs from the VPN app's dependency list."
+    },
+    "rule_id": "AAPL-DATA-004",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "5.4",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#vpn-apps"
+    },
+    "status": "validated",
+    "title": "No tracking-flagged dependencies in a VPN app",
+    "updated_at": "2026-09-01T18:08:59.591399Z",
+    "version": 1
+  }
+]

@@ -1,0 +1,19 @@
+// The plugins block names this module as the one that builds the shipped APK.
+// Without it the checker treats the directory as a library and reads nothing,
+// and a fixture that never triggers a rule passes every assertion about it.
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.lowtarget'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.lowtarget"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+}

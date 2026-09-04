@@ -1,0 +1,126 @@
+[
+  {
+    "category": "API",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "Apple removed UIWebView from the App Store. An upload that holds a reference to UIWebView is rejected with ITMS-90809.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "api_usage",
+          "parameters": {
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.h"
+            ],
+            "symbol": "\\bUIWebView\\b"
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())"
+      ],
+      "summary": "Replace UIWebView with WKWebView, and remove every UIWebView reference from the code and from the dependencies."
+    },
+    "rule_id": "AAPL-API-001",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "2026-08-31",
+      "section": "2.5.1",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#software-requirements"
+    },
+    "status": "validated",
+    "title": "The app uses UIWebView",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "API",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 5.4 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.591399Z"
+      },
+      {
+        "change": "Precondition restored on 2026-09-01. The rule is conditional, and without one it fired on every app in the validation corpus.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the check read only files that import the framework it says is missing.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.591399Z",
+    "description": "A project that ships the Personal VPN entitlement must configure its tunnel through the NetworkExtension VPN manager classes (NEVPNManager or NETunnelProviderManager). Custom or undocumented tunneling paths are not permitted for VPN functionality.",
+    "detection": {
+      "applies_when": [
+        {
+          "check": {
+            "check_type": "entitlement_present",
+            "parameters": {
+              "key": "com.apple.developer.networking.vpn.api"
+            }
+          },
+          "when": "check_passes"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "api_usage",
+          "parameters": {
+            "expect_present": true,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm"
+            ],
+            "symbol": "NEVPNManager|NETunnelProviderManager|NEPacketTunnelProvider"
+          }
+        }
+      ],
+      "targets": [
+        "entitlements",
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "import NetworkExtension\nNEVPNManager.shared().loadFromPreferences { error in /* configure protocol, then saveToPreferences */ }"
+      ],
+      "forum_insights": [],
+      "summary": "Create and manage the VPN configuration through NEVPNManager or NETunnelProviderManager instead of a custom tunneling implementation."
+    },
+    "rule_id": "AAPL-API-008",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "5.4",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#vpn-apps"
+    },
+    "status": "validated",
+    "title": "VPN entitlement requires NEVPNManager / NetworkExtension APIs",
+    "updated_at": "2026-09-01T18:08:59.591399Z",
+    "version": 1
+  }
+]

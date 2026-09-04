@@ -1,0 +1,79 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	objectVersion = 56;
+	objects = {
+		AA01 /* Project object */ = {
+			isa = PBXProject;
+			mainGroup = BB01;
+			targets = (
+				CC01 /* App */,
+				CC02 /* AppTests */,
+			);
+		};
+		BB01 = {
+			isa = PBXGroup;
+			children = ( BB02, BB03, );
+			sourceTree = "<group>";
+		};
+		BB02 = {
+			isa = PBXGroup;
+			path = App;
+			children = ( FF01, FF02, );
+			sourceTree = "<group>";
+		};
+		BB03 = {
+			isa = PBXGroup;
+			path = AppTests;
+			children = ( FF03, );
+			sourceTree = "<group>";
+		};
+		FF01 = { isa = PBXFileReference; path = LegacyView.swift; sourceTree = "<group>"; };
+		FF02 = { isa = PBXFileReference; path = Info.plist; sourceTree = "<group>"; };
+		FF03 = { isa = PBXFileReference; path = HelperTests.swift; sourceTree = "<group>"; };
+		GG01 = { isa = PBXBuildFile; fileRef = FF01; };
+		GG03 = { isa = PBXBuildFile; fileRef = FF03; };
+		SS01 = { isa = PBXSourcesBuildPhase; files = ( GG01, ); };
+		SS02 = { isa = PBXSourcesBuildPhase; files = ( GG03, ); };
+		CC01 = {
+			isa = PBXNativeTarget;
+			name = App;
+			productType = "com.apple.product-type.application";
+			buildPhases = ( SS01, );
+			buildConfigurationList = LL01;
+		};
+		CC02 = {
+			isa = PBXNativeTarget;
+			name = AppTests;
+			productType = "com.apple.product-type.bundle.unit-test";
+			buildPhases = ( SS02, );
+			buildConfigurationList = LL02;
+		};
+		LL01 = { isa = XCConfigurationList; buildConfigurations = ( XX01, XX02, ); };
+		LL02 = { isa = XCConfigurationList; buildConfigurations = ( XX03, ); };
+		XX01 = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pekoui.bad.debug;
+			};
+		};
+		XX02 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pekoui.bad;
+				INFOPLIST_FILE = "App/Info.plist";
+				SWIFT_VERSION = 5.0;
+			};
+		};
+		XX03 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = com.pekoui.bad.tests; };
+		};
+	};
+	rootObject = AA01;
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "category": "LEGAL",
+    "changelog": [
+      {
+        "change": "Repointed. The rule cited \"Export compliance\" in the review guidelines, which has no section by that name. A person chose this section, because it is where Apple documents the ITSAppUsesNonExemptEncryption key the rule checks.",
+        "date": "2026-09-03T03:47:45Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "ITSAppUsesNonExemptEncryption states whether the app uses non-exempt encryption. Without the key, App Store Connect asks the question on every upload, which blocks an automated release pipeline.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_present",
+          "parameters": {
+            "file": "info_plist",
+            "key": "ITSAppUsesNonExemptEncryption"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "<key>ITSAppUsesNonExemptEncryption</key>\n<false/>"
+      ],
+      "summary": "Add ITSAppUsesNonExemptEncryption to Info.plist and set the correct value for the app."
+    },
+    "rule_id": "AAPL-LEGAL-001",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "apple-encryption-export-compliance",
+      "document_version": "2026-08-31",
+      "section": "Declare Your App's Use of Encryption",
+      "url": "https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations"
+    },
+    "status": "validated",
+    "title": "The export compliance key is not declared",
+    "updated_at": "2026-09-03T03:47:45Z",
+    "version": 2
+  },
+  {
+    "category": "LEGAL",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 3.1.5 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.581537Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.581537Z",
+    "description": "Apps may not perform cryptocurrency mining computation on the device. Detects known mining libraries, hashing algorithm implementations, and stratum mining protocol usage in source or dependencies.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Tests/**",
+              "**/Pods/**/Documentation/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.h",
+              "**/*.cpp",
+              "**/*.c",
+              "**/*.js",
+              "Podfile",
+              "Package.swift"
+            ],
+            "pattern": "(coinhive|cryptonight|randomx|stratum\\+tcp|minerd|cpuminer|xmrig|ethminer|scrypt_hash|startMining|MiningEngine)"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "dependency"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Delete the XMRig/cpuminer dependency and call a cloud mining API instead of hashing locally.",
+        "Replace local stratum client connections with a backend service that returns mining results."
+      ],
+      "forum_insights": [],
+      "summary": "Remove on-device mining code and move any mining computation to a server or cloud service."
+    },
+    "rule_id": "AAPL-LEGAL-012",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "3.1.5",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#cryptocurrencies"
+    },
+    "status": "validated",
+    "title": "On-device cryptocurrency mining code or libraries",
+    "updated_at": "2026-09-01T18:08:59.581537Z",
+    "version": 1
+  }
+]

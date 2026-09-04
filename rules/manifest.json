@@ -1,0 +1,6 @@
+{
+  "database_version": "0.1.0",
+  "schema_version": 1,
+  "updated_at": "2026-08-31T00:00:00Z",
+  "description": "Seed rule database for Peko v1. Rules were authored by hand from the canonical policy documents. The LLM rule compiler replaces this hand authoring in phase 1."
+}

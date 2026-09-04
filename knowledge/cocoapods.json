@@ -1,0 +1,750 @@
+[
+  {
+    "package_id": "cocoapods:Adjust",
+    "package_name": "Adjust",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs, and reads device identifiers to match a user across apps. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Airship",
+    "package_name": "Airship",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends push notifications, and records user attributes. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Amplitude",
+    "package_name": "Amplitude",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects behavioral events tied to a user or device identifier. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:AppLovinSDK",
+    "package_name": "AppLovin",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and reads device identifiers for targeting. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:AppsFlyerFramework",
+    "package_name": "AppsFlyer",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs, and reads device identifiers to match a user across apps. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Branch",
+    "package_name": "Branch",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Attributes installs through deep links, and reads device identifiers. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Braze-Swift-SDK",
+    "package_name": "Braze",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Sends marketing messages, and records user attributes and events. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "email_address",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Bugsnag",
+    "package_name": "Bugsnag",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends crash reports that carry device and session data. The app must disclose diagnostic collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:FBAudienceNetwork",
+    "package_name": "Meta Audience Network",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and reads device identifiers for targeting. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:FBSDKLoginKit",
+    "package_name": "Facebook Login",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Signs a user in with a Meta account, and shares app events with Meta. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "name",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "email_address",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:FirebaseAnalytics",
+    "package_name": "Firebase Analytics",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects app usage events and device identifiers, and sends them to Google. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:FirebaseCrashlytics",
+    "package_name": "Crashlytics",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends crash reports that carry a device identifier and app state. The app must disclose diagnostic collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Google-Mobile-Ads-SDK",
+    "package_name": "Google Mobile Ads",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and reads the advertising identifier for targeting. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "coarse_location",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:GoogleAnalytics",
+    "package_name": "Google Analytics",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects app usage events and device identifiers. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:GoogleSignIn",
+    "package_name": "Google Sign In",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Signs a user in with a Google account. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "name",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "email_address",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Heap",
+    "package_name": "Heap",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Records user interaction events automatically. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Instabug",
+    "package_name": "Instabug",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Records screenshots, logs, and session replays for bug reports. The app must disclose diagnostic collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "photos_or_videos",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:IronSourceSDK",
+    "package_name": "ironSource",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and mediates other ad networks. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Mixpanel",
+    "package_name": "Mixpanel",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Collects behavioral events tied to a user or device identifier. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:OneSignalXCFramework",
+    "package_name": "OneSignal",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends push notifications, and records a device identifier and segments. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Segment",
+    "package_name": "Segment",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Routes user and device events to other analytics and marketing tools. The app must disclose this collection in its privacy details and its data safety form.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "product_interaction",
+        "purpose": "analytics",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:Sentry",
+    "package_name": "Sentry",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "data_collection",
+        "description": "Sends crash and error reports that can carry user context. The app must disclose diagnostic collection in its privacy details and its data safety form.",
+        "severity": "info",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "crash_data",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      },
+      {
+        "data_type": "device_id",
+        "purpose": "app_functionality",
+        "linked_to_identity": false
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  },
+  {
+    "package_id": "cocoapods:UnityAds",
+    "package_name": "Unity Ads",
+    "ecosystem": "cocoapods",
+    "compliance_flags": [
+      {
+        "flag_type": "tracking",
+        "description": "Serves advertising and reads device identifiers for targeting. The app must ask for tracking permission on iOS, and it must declare the advertising ID on Android.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      },
+      {
+        "flag_type": "data_collection",
+        "description": "An advertising SDK collects device and usage data for targeting.",
+        "severity": "warning",
+        "platform": "ios",
+        "related_rule_ids": [],
+        "evidence": "Apple privacy manifest and required reason API documentation",
+        "last_verified": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "required_privacy_declarations": [
+      {
+        "data_type": "device_id",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      },
+      {
+        "data_type": "advertising_data",
+        "purpose": "advertising",
+        "linked_to_identity": true
+      }
+    ],
+    "last_updated": "2026-09-01T00:00:00Z"
+  }
+]

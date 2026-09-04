@@ -1,0 +1,519 @@
+[
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Seed rule authored by hand from the required reason API document.",
+        "date": "2026-08-31T00:00:00Z"
+      },
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. The checker cannot map a source file to the build target whose privacy manifest must declare the API, so an error is over-confident. Six published apps tripped it.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Restored to error after the Xcode target parsing landed on 2026-09-01. The checker now maps a source file to its build target, and it reads the privacy manifest of that target. The reason for the earlier demotion is gone.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads or writes UserDefaults must declare the NSPrivacyAccessedAPICategoryUserDefaults category in PrivacyInfo.xcprivacy with an approved reason code. App Store Connect rejects an upload that uses the API without the declaration.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "allowed_reasons": [
+              "CA92.1",
+              "1C8F.1",
+              "C56D.1",
+              "AC6B.1"
+            ],
+            "api_type": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "requirement": "api_reason_declared",
+            "triggered_by": [
+              "\\bUserDefaults\\b",
+              "\\bNSUserDefaults\\b"
+            ]
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "<key>NSPrivacyAccessedAPITypes</key>\n<array>\n  <dict>\n    <key>NSPrivacyAccessedAPIType</key>\n    <string>NSPrivacyAccessedAPICategoryUserDefaults</string>\n    <key>NSPrivacyAccessedAPITypeReasons</key>\n    <array><string>CA92.1</string></array>\n  </dict>\n</array>"
+      ],
+      "summary": "Add an NSPrivacyAccessedAPITypes entry for NSPrivacyAccessedAPICategoryUserDefaults with the reason code that describes the use."
+    },
+    "rule_id": "AAPL-PRIV-001",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-privacy-accessed-api-type",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyAccessedAPICategoryUserDefaults",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+    },
+    "status": "validated",
+    "title": "User defaults access needs a declared reason",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 3
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. The checker cannot map a source file to the build target whose privacy manifest must declare the API, so an error is over-confident. Six published apps tripped it.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Restored to error after the Xcode target parsing landed on 2026-09-01. The checker now maps a source file to its build target, and it reads the privacy manifest of that target. The reason for the earlier demotion is gone.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Tightened the trigger patterns after the validation run of 2026-09-01. The pattern for a bare creationDate matched a function parameter named creationDate in Bitwarden. The patterns now name the resource value keys and the C functions, which are the API surface that Apple lists. The pattern for attributesOfItem was also removed: Bitwarden calls it to read a file size, not a date.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads file creation or modification timestamps must declare the NSPrivacyAccessedAPICategoryFileTimestamp category in PrivacyInfo.xcprivacy with an approved reason code.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "allowed_reasons": [
+              "DDA9.1",
+              "C617.1",
+              "3B52.1",
+              "0A2A.1"
+            ],
+            "api_type": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "requirement": "api_reason_declared",
+            "triggered_by": [
+              "\\.creationDateKey\\b",
+              "\\.contentModificationDateKey\\b",
+              "NSURLCreationDateKey",
+              "NSURLContentModificationDateKey",
+              "NSFileCreationDate",
+              "NSFileModificationDate",
+              "\\bf?getattrlist(bulk|at)?\\s*\\(",
+              "\\b[lf]?stat(at)?\\s*\\("
+            ]
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add an NSPrivacyAccessedAPITypes entry for NSPrivacyAccessedAPICategoryFileTimestamp with the reason code that describes the use."
+    },
+    "rule_id": "AAPL-PRIV-002",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-privacy-accessed-api-type",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyAccessedAPICategoryFileTimestamp",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+    },
+    "status": "validated",
+    "title": "File timestamp access needs a declared reason",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 4
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. The checker cannot map a source file to the build target whose privacy manifest must declare the API, so an error is over-confident. Six published apps tripped it.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Restored to error after the Xcode target parsing landed on 2026-09-01. The checker now maps a source file to its build target, and it reads the privacy manifest of that target. The reason for the earlier demotion is gone.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads the system boot time must declare the NSPrivacyAccessedAPICategorySystemBootTime category in PrivacyInfo.xcprivacy with an approved reason code.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "allowed_reasons": [
+              "35F9.1",
+              "8FFB.1",
+              "3D61.1"
+            ],
+            "api_type": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "requirement": "api_reason_declared",
+            "triggered_by": [
+              "\\bsystemUptime\\b",
+              "\\bmach_absolute_time\\b",
+              "kern\\.boottime"
+            ]
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add an NSPrivacyAccessedAPITypes entry for NSPrivacyAccessedAPICategorySystemBootTime with the reason code that describes the use."
+    },
+    "rule_id": "AAPL-PRIV-003",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-privacy-accessed-api-type",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyAccessedAPICategorySystemBootTime",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+    },
+    "status": "validated",
+    "title": "System boot time access needs a declared reason",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 3
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. The checker cannot map a source file to the build target whose privacy manifest must declare the API, so an error is over-confident. Six published apps tripped it.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Restored to error after the Xcode target parsing landed on 2026-09-01. The checker now maps a source file to its build target, and it reads the privacy manifest of that target. The reason for the earlier demotion is gone.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads available disk space must declare the NSPrivacyAccessedAPICategoryDiskSpace category in PrivacyInfo.xcprivacy with an approved reason code.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "allowed_reasons": [
+              "85F4.1",
+              "E174.1",
+              "7D9E.1",
+              "B728.1"
+            ],
+            "api_type": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "requirement": "api_reason_declared",
+            "triggered_by": [
+              "volumeAvailableCapacity",
+              "NSFileSystemFreeSize",
+              "NSFileSystemSize",
+              "\\bstatfs\\s*\\("
+            ]
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add an NSPrivacyAccessedAPITypes entry for NSPrivacyAccessedAPICategoryDiskSpace with the reason code that describes the use."
+    },
+    "rule_id": "AAPL-PRIV-004",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-privacy-accessed-api-type",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyAccessedAPICategoryDiskSpace",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+    },
+    "status": "validated",
+    "title": "Disk space access needs a declared reason",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 2
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Demoted from error to warning after the validation run of 2026-09-01. The checker cannot map a source file to the build target whose privacy manifest must declare the API, so an error is over-confident. Six published apps tripped it.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Restored to error after the Xcode target parsing landed on 2026-09-01. The checker now maps a source file to its build target, and it reads the privacy manifest of that target. The reason for the earlier demotion is gone.",
+        "date": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads the list of active keyboards must declare the NSPrivacyAccessedAPICategoryActiveKeyboards category in PrivacyInfo.xcprivacy with an approved reason code.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "allowed_reasons": [
+              "3EC4.1",
+              "54BD.1"
+            ],
+            "api_type": "NSPrivacyAccessedAPICategoryActiveKeyboards",
+            "requirement": "api_reason_declared",
+            "triggered_by": [
+              "activeInputModes"
+            ]
+          }
+        }
+      ],
+      "targets": [
+        "manifest",
+        "source"
+      ]
+    },
+    "overridable": false,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add an NSPrivacyAccessedAPITypes entry for NSPrivacyAccessedAPICategoryActiveKeyboards with the reason code that describes the use."
+    },
+    "rule_id": "AAPL-PRIV-005",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-privacy-accessed-api-type",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyAccessedAPICategoryActiveKeyboards",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+    },
+    "status": "validated",
+    "title": "Active keyboard access needs a declared reason",
+    "updated_at": "2026-09-01T00:00:00Z",
+    "version": 3
+  },
+  {
+    "category": "PRIV",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "Apple expects a PrivacyInfo.xcprivacy file in the app bundle. The file declares tracking, tracking domains, collected data types, and required reason API use. An app without one cannot declare any of them.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "requirement": "file_present"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add a PrivacyInfo.xcprivacy file to the app target and declare the tracking flag, the tracking domains, the collected data types, and the required reason APIs."
+    },
+    "rule_id": "AAPL-PRIV-010",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-privacy-manifest-files",
+      "document_version": "2026-08-31",
+      "section": "Privacy manifest files",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files"
+    },
+    "status": "validated",
+    "title": "The app has no privacy manifest",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "PrivacyInfo.xcprivacy must hold an NSPrivacyTracking boolean. The value states whether the app tracks users as Apple defines tracking.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "privacy_manifest",
+          "parameters": {
+            "requirement": "tracking_flag_declared"
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "<key>NSPrivacyTracking</key>\n<false/>"
+      ],
+      "summary": "Add an NSPrivacyTracking key to PrivacyInfo.xcprivacy and set it to true or false."
+    },
+    "rule_id": "AAPL-PRIV-011",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-privacy-tracking-key",
+      "document_version": "2026-08-31",
+      "section": "NSPrivacyTracking",
+      "url": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files"
+    },
+    "status": "validated",
+    "title": "The privacy manifest does not declare the tracking flag",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Citation moved from 5.1.2(i) to 5.1.2. Apple writes that subsection inside the body of its parent rather than under its own heading, so the parent is where the text is.",
+        "date": "2026-09-02T02:13:48Z"
+      }
+    ],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "An app that reads the advertising identifier must ask for permission through App Tracking Transparency. The Info.plist must hold NSUserTrackingUsageDescription, and the app must call the tracking authorization request before it reads the identifier.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "api_usage",
+          "parameters": {
+            "require_any_import": [
+              "import AdSupport",
+              "<AdSupport/",
+              "AdSupport;"
+            ],
+            "symbol": "\\badvertisingIdentifier\\b"
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Add NSUserTrackingUsageDescription to Info.plist and call ATTrackingManager.requestTrackingAuthorization before the app reads the advertising identifier."
+    },
+    "rule_id": "AAPL-PRIV-020",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "2026-08-31",
+      "section": "5.1.2",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#data-use-and-sharing"
+    },
+    "status": "validated",
+    "title": "The advertising identifier is read without a tracking usage description",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 5.5 at document version 20260901T052521884Z-f9438536. Model confidence 0.45. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.591773Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Moved onto the closed fact vocabulary: offers_mdm_services became ships_mdm.",
+        "date": "2026-09-01T23:07:59Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.591773Z",
+    "description": "MDM apps may include third-party analytics only when the service collects performance data about the developer's own app and nothing about the user, the device, or other apps. Tracking or data-collection SDKs in the dependency graph need review.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "ships_mdm",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "cocoapods",
+              "swift_package"
+            ],
+            "flag_type": "tracking"
+          }
+        },
+        {
+          "check_type": "dependency_flag",
+          "parameters": {
+            "ecosystems": [
+              "cocoapods",
+              "swift_package"
+            ],
+            "flag_type": "data_collection"
+          }
+        }
+      ],
+      "targets": [
+        "dependency"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Drop advertising/attribution pods and configure the remaining analytics SDK to disable user identifiers, device inventory, and installed-app reporting."
+      ],
+      "forum_insights": [],
+      "summary": "Remove tracking and user-data analytics SDKs, or restrict analytics to app-performance metrics only."
+    },
+    "rule_id": "AAPL-PRIV-042",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "5.5",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#mobile-device-management"
+    },
+    "status": "validated",
+    "title": "Analytics or tracking SDKs present in an MDM app",
+    "updated_at": "2026-09-01T18:08:59.591773Z",
+    "version": 1
+  }
+]

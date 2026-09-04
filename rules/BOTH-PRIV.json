@@ -1,0 +1,305 @@
+[
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Compiled from us-ccpa-regulations section 7011 at document version 20260901T214500738Z-97cfc41e. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T22:01:20.358379Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T22:01:20.358379Z",
+    "description": "An app whose business sells or shares personal information must surface a 'Do Not Sell or Share My Personal Information' control or Notice of Right to Opt-out that users can reach from the app.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US-CA",
+          "when": "fact_contains"
+        },
+        {
+          "key": "sells_or_shares_personal_information",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Pods/**",
+              "**/node_modules/**",
+              "**/build/**"
+            ],
+            "expect_present": true,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.kt",
+              "**/*.java",
+              "**/*.xml",
+              "**/*.strings",
+              "**/*.json",
+              "**/*.js",
+              "**/*.ts",
+              "**/*.dart",
+              "**/*.html",
+              "**/*.md"
+            ],
+            "pattern": "do\\s*not\\s*sell(\\s*or\\s*share)?|opt[\\s_\\-]?out\\s*of\\s*(the\\s*)?(sale|sharing)|donotsell"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "asset"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "The app must expose an opt-out control or link because the business sells or shares personal information.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The business uses the Alternative Opt-out Link or processes opt-out preference signals frictionlessly, so the exact wording may differ, though a notice is still required.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Add a settings row 'Do Not Sell or Share My Personal Information' that opens https://example.com/do-not-sell or sets the opt-out flag locally and server side.",
+        "If you do not sell or share, set sells_or_shares_personal_information to false and state that fact in the privacy policy."
+      ],
+      "forum_insights": [],
+      "summary": "Add a 'Do Not Sell or Share My Personal Information' link or in-app toggle that opts the user out, and post the Notice of Right to Opt-out."
+    },
+    "rule_id": "BOTH-PRIV-033",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "us-ccpa-regulations",
+      "document_version": "20260901T214500738Z-97cfc41e",
+      "section": "7011",
+      "url": "https://cppa.ca.gov/regulations/consumer_privacy_act.html"
+    },
+    "status": "validated",
+    "title": "Selling or sharing data requires an opt-out notice and link",
+    "updated_at": "2026-09-01T22:01:20.358379Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Compiled from us-ccpa-regulations section 7011 at document version 20260901T214500738Z-97cfc41e. Model confidence 0.55. Awaiting human review.",
+        "date": "2026-09-01T22:01:20.358379Z"
+      },
+      {
+        "change": "Moved onto the closed fact vocabulary: uses_sensitive_personal_information_beyond_permitted_purposes became uses_spi_beyond_permitted_purposes.",
+        "date": "2026-09-01T23:07:59Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T22:01:20.358379Z",
+    "description": "An app whose business uses or discloses sensitive personal information beyond the purposes permitted by Section7027(m) must offer a 'Limit the Use of My Sensitive Personal Information' control or notice reachable from the app.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US-CA",
+          "when": "fact_contains"
+        },
+        {
+          "key": "uses_spi_beyond_permitted_purposes",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Pods/**",
+              "**/node_modules/**",
+              "**/build/**"
+            ],
+            "expect_present": true,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.kt",
+              "**/*.java",
+              "**/*.xml",
+              "**/*.strings",
+              "**/*.json",
+              "**/*.js",
+              "**/*.ts",
+              "**/*.dart",
+              "**/*.html",
+              "**/*.md"
+            ],
+            "pattern": "limit\\s+the\\s+use\\s+of\\s+my\\s+sensitive|right\\s+to\\s+limit|limit\\s+sensitive\\s+(personal\\s+)?information"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "asset"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "The app must expose the right-to-limit control because sensitive personal information is used beyond permitted purposes.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The business relies on the Alternative Opt-out Link, so the wording differs but a Notice of Right to Limit is still required.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "Add a settings row that opens https://example.com/limit-sensitive-info with the notice and request form.",
+        "If sensitive data is used only for permitted purposes, state that in the privacy policy and set the fact to false."
+      ],
+      "forum_insights": [],
+      "summary": "Add a 'Limit the Use of My Sensitive Personal Information' link or toggle and post the Notice of Right to Limit."
+    },
+    "rule_id": "BOTH-PRIV-034",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "us-ccpa-regulations",
+      "document_version": "20260901T214500738Z-97cfc41e",
+      "section": "7011",
+      "url": "https://cppa.ca.gov/regulations/consumer_privacy_act.html"
+    },
+    "status": "validated",
+    "title": "Sensitive data use requires a Notice of Right to Limit link",
+    "updated_at": "2026-09-01T22:01:20.358379Z",
+    "version": 1
+  },
+  {
+    "category": "PRIV",
+    "changelog": [
+      {
+        "change": "Compiled from us-ccpa-regulations section 7015 at document version 20260901T214500738Z-97cfc41e. Model confidence 0.55. Awaiting human review.",
+        "date": "2026-09-01T22:02:07.800519Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T22:02:07.800519Z",
+    "description": "An app that offers the single combined opt-out link instead of the two separate opt-out links must label that link exactly \"Your Privacy Choices\" or \"Your California Privacy Choices\". This check looks for that exact wording somewhere in the app's UI strings or localized resources.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "distributes_in",
+          "value": "US-CA",
+          "when": "fact_contains"
+        },
+        {
+          "key": "uses_alternative_optout_link",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Pods/**",
+              "**/node_modules/**",
+              "**/build/**"
+            ],
+            "expect_present": true,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.kt",
+              "**/*.java",
+              "**/*.strings",
+              "**/*.stringsdict",
+              "**/*.xcstrings",
+              "**/res/values*/strings.xml",
+              "**/*.xml",
+              "**/*.json",
+              "**/*.html",
+              "**/*.ts",
+              "**/*.tsx",
+              "**/*.js",
+              "**/*.jsx",
+              "**/*.dart"
+            ],
+            "pattern": "Your\\s+(California\\s+)?Privacy\\s+Choices"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "asset"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "The exact title string must appear in the shipped UI text, so a literal string search over source and localized resources is a valid proxy.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The title may be delivered from a server or a remote web view, in which case the repository holds no evidence and the check cannot confirm compliance.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "both",
+    "remediation": {
+      "examples": [
+        "In Localizable.strings: \"privacy_choices_link\" = \"Your Privacy Choices\";",
+        "In res/values/strings.xml: <string name=\"privacy_choices_link\">Your California Privacy Choices</string>"
+      ],
+      "forum_insights": [],
+      "summary": "Label the combined opt-out control exactly \"Your Privacy Choices\" or \"Your California Privacy Choices\" and store that text in the app's localized strings."
+    },
+    "rule_id": "BOTH-PRIV-035",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "us-ccpa-regulations",
+      "document_version": "20260901T214500738Z-97cfc41e",
+      "section": "7015",
+      "url": "https://cppa.ca.gov/regulations/consumer_privacy_act.html"
+    },
+    "status": "validated",
+    "title": "Alternative opt-out link must be titled \"Your Privacy Choices\"",
+    "updated_at": "2026-09-01T22:02:07.800519Z",
+    "version": 1
+  }
+]

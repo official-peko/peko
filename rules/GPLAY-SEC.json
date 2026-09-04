@@ -1,0 +1,175 @@
+[
+  {
+    "category": "SEC",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "android:usesCleartextTraffic set to true lets the app send unencrypted HTTP traffic. Google Play flags an app that transmits personal or sensitive data over an unencrypted connection.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.application.@android:usesCleartextTraffic",
+            "match": "equals",
+            "required": false,
+            "value": false
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "<application android:networkSecurityConfig=\"@xml/network_security_config\" />"
+      ],
+      "summary": "Set android:usesCleartextTraffic to false, and add a network security configuration with a per domain exception if one host still needs HTTP."
+    },
+    "rule_id": "GPLAY-SEC-001",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-device-and-network-abuse",
+      "document_version": "2026-08-31",
+      "section": "Device and Network Abuse",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9888379"
+    },
+    "status": "validated",
+    "title": "The app allows cleartext network traffic",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "SEC",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "android:allowBackup set to true copies app data into a cloud or local backup. An app that stores credentials or health data must turn the flag off or exclude those files with a backup rule.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "android_manifest",
+            "key": "manifest.application.@android:allowBackup",
+            "match": "equals",
+            "required": false,
+            "value": false
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "android",
+    "remediation": {
+      "examples": [],
+      "summary": "Set android:allowBackup to false, or list the files to exclude in a data extraction rules file."
+    },
+    "rule_id": "GPLAY-SEC-002",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "google-play-user-data",
+      "document_version": "2026-08-31",
+      "section": "User Data",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10144311"
+    },
+    "status": "validated",
+    "title": "Automatic backup is enabled",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "SEC",
+    "changelog": [
+      {
+        "change": "Compiled from google-play-target-api-level-requirements section Migrate from Android 10 (API level 29) to Android 11 (API level 30) at document version 20260901T173614601Z-35c84aed. Model confidence 0.55. Awaiting human review.",
+        "date": "2026-09-01T18:09:04.116976Z"
+      },
+      {
+        "change": "Verification lowered the severity from error to warning, because the check cannot support the stronger claim.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection and named no fix that a pass can apply. A person must read it. Add a check for v2SigningEnabled==true (required) in addition to the existing v1SigningEnabled check, and treat the v1 check as advisory (warning) rather than error since policy uses 'should'.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Writing a rejection case showed the rule could not fire on the fault it names: the setting name carried a prefix the build file parser never produces.",
+        "date": "2026-09-02T00:10:30Z"
+      },
+      {
+        "change": "Verification graded this rule wrong_detection and named no fix that a pass can apply. A person must read it. Add a check for v2SigningEnabled=true as required, in addition to checking v1SigningEnabled=true as recommended.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification named a fix that a pass could not apply: the rule read one half of the signing requirement.",
+        "date": "2026-09-02T02:06:02Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T02:15:06Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:09:04.116976Z",
+    "description": "Apps must be signed with APK Signature Scheme v2 (required) and should also continue signing with v1 for compatibility with older devices.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "config_value",
+          "parameters": {
+            "file": "build_gradle",
+            "match": "equals",
+            "required": false,
+            "setting": "v1SigningEnabled",
+            "value": true
+          }
+        },
+        {
+          "check_type": "config_value",
+          "parameters": {
+            "file": "build_gradle",
+            "match": "equals",
+            "required": false,
+            "setting": "v2SigningEnabled",
+            "value": true
+          }
+        }
+      ],
+      "targets": [
+        "config"
+      ]
+    },
+    "interpretations": [],
+    "overridable": false,
+    "platform": "android",
+    "remediation": {
+      "examples": [
+        "signingConfigs { release { v1SigningEnabled true; v2SigningEnabled true } }"
+      ],
+      "forum_insights": [],
+      "summary": "In the app's build.gradle signing configuration, set both v1SigningEnabled and v2SigningEnabled to true."
+    },
+    "rule_id": "GPLAY-SEC-020",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "google-play-target-api-level-requirements",
+      "document_version": "20260901T173614601Z-35c84aed",
+      "section": "Migrate from Android 10 (API level 29) to Android 11 (API level 30)",
+      "url": "https://developer.android.com/google/play/requirements/target-sdk#migrate-from-android-10-api-level-29-to-android-11-api-level-30"
+    },
+    "status": "validated",
+    "title": "Continue signing with APK Signature Scheme v1 for backward compatibility",
+    "updated_at": "2026-09-01T18:09:04.116976Z",
+    "version": 1
+  }
+]

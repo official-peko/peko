@@ -1,0 +1,253 @@
+[
+  {
+    "category": "META",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.1 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.566789Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.566789Z",
+    "description": "Submitted builds must not contain leftover placeholder content such as lorem ipsum text, 'TODO'/'FIXME' user-facing strings, or example/localhost URLs. Replace these with final content before submission.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Tests/**",
+              "**/*Tests*/**",
+              "**/Pods/**",
+              "**/build/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.h",
+              "**/*.storyboard",
+              "**/*.xib",
+              "**/*.strings",
+              "**/*.xcstrings",
+              "**/*.json"
+            ],
+            "pattern": "(lorem ipsum|placeholder text|PLACEHOLDER|Insert (your )?text here|TODO: replace|Coming soon...?)"
+          }
+        },
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [
+              "**/Tests/**",
+              "**/*Tests*/**",
+              "**/Pods/**",
+              "**/build/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.h",
+              "**/*.plist",
+              "**/*.json",
+              "**/*.strings"
+            ],
+            "pattern": "https?://(www\\.)?(example\\.(com|org|net)|localhost|127\\.0\\.0\\.1|test\\.com|yourdomain\\.[a-z]+|changeme)"
+          }
+        }
+      ],
+      "targets": [
+        "source",
+        "asset",
+        "config"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Replace `let supportURL = URL(string: \"https://example.com/support\")!` with the real support page URL.",
+        "Replace the 'Lorem ipsum' onboarding copy in Localizable.strings with final marketing text."
+      ],
+      "forum_insights": [],
+      "summary": "Remove placeholder copy and dummy URLs from the shipping target and point every link at a live production endpoint."
+    },
+    "rule_id": "AAPL-META-002",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.1",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#app-completeness"
+    },
+    "status": "validated",
+    "title": "No placeholder text or dummy URLs in shipped code",
+    "updated_at": "2026-09-01T18:08:59.566789Z",
+    "version": 1
+  },
+  {
+    "category": "META",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.3.7 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.570143Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.570143Z",
+    "description": "The name shown on the App Store and home screen must not exceed 30 characters. If the project declares CFBundleDisplayName or CFBundleName, the value must fit within that limit.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "info_plist",
+            "key": "CFBundleDisplayName",
+            "match": "regex",
+            "pattern": "^.{1,30}$",
+            "required": false
+          }
+        },
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "info_plist",
+            "key": "CFBundleName",
+            "match": "regex",
+            "pattern": "^.{1,30}$",
+            "required": false
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "The 30-character cap applies to the App Store listing name, which usually matches CFBundleDisplayName in the project.",
+        "likelihood": "high"
+      },
+      {
+        "evidence_ids": [],
+        "interpretation": "The cap applies only to the store listing entered in App Store Connect, so a longer bundle name is tolerated.",
+        "likelihood": "medium"
+      }
+    ],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "<key>CFBundleDisplayName</key><string>Photo Vault Pro</string>",
+        "Replace a build-variable name that expands past 30 characters with a fixed short name."
+      ],
+      "forum_insights": [],
+      "summary": "Shorten the app's display name so it is at most 30 characters, and keep the store listing name in sync."
+    },
+    "rule_id": "AAPL-META-006",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.3.7",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.3.7"
+    },
+    "status": "validated",
+    "title": "App display name must be 30 characters or fewer",
+    "updated_at": "2026-09-01T18:08:59.570143Z",
+    "version": 1
+  },
+  {
+    "category": "META",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.3.8 at document version 20260901T052521884Z-f9438536. Model confidence 0.50. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.571514Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.571514Z",
+    "description": "Terms such as 'For Kids' and 'For Children' in app name, subtitle, description, or keywords are reserved for apps listed in the Kids Category. Apps not in that category must not use these phrases in their metadata.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "kids_category",
+          "value": false,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": true,
+            "exclude": [],
+            "expect_present": false,
+            "include": [
+              "fastlane/metadata/**/*.txt",
+              "fastlane/metadata/**/name.txt",
+              "fastlane/metadata/**/subtitle.txt",
+              "fastlane/metadata/**/description.txt",
+              "fastlane/metadata/**/keywords.txt"
+            ],
+            "pattern": "for\\s+(kids|children)"
+          }
+        }
+      ],
+      "targets": [
+        "config",
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Change app subtitle from 'Fun Math For Kids' to 'Fun Math Learning Game'."
+      ],
+      "forum_insights": [],
+      "summary": "Remove phrases like 'For Kids' or 'For Children' from your app name, subtitle, description, and keywords unless your app is submitted under the Kids Category."
+    },
+    "rule_id": "AAPL-META-008",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.3.8",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.3.8"
+    },
+    "status": "validated",
+    "title": "Do not use 'For Kids' or 'For Children' in metadata outside the Kids Category",
+    "updated_at": "2026-09-01T18:08:59.571514Z",
+    "version": 1
+  }
+]

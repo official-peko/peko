@@ -1,0 +1,214 @@
+[
+  {
+    "category": "SEC",
+    "changelog": [],
+    "created_at": "2026-08-31T00:00:00Z",
+    "description": "NSAllowsArbitraryLoads turns App Transport Security off for the whole app. App Review asks for a justification, and an app that sends user data over an unencrypted connection is rejected.",
+    "detection": {
+      "mechanical_checks": [
+        {
+          "check_type": "manifest_key_value",
+          "parameters": {
+            "file": "info_plist",
+            "key": "NSAppTransportSecurity.NSAllowsArbitraryLoads",
+            "match": "equals",
+            "required": false,
+            "value": false
+          }
+        }
+      ],
+      "targets": [
+        "manifest"
+      ]
+    },
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [],
+      "summary": "Remove NSAllowsArbitraryLoads and add an NSExceptionDomains entry for each domain that still needs an exception."
+    },
+    "rule_id": "AAPL-SEC-001",
+    "rule_type": "mechanical",
+    "severity": "warning",
+    "source": {
+      "document": "apple-app-transport-security",
+      "document_version": "2026-08-31",
+      "section": "NSAppTransportSecurity",
+      "url": "https://developer.apple.com/documentation/security/preventing-insecure-network-connections"
+    },
+    "status": "validated",
+    "title": "App Transport Security is disabled for every domain",
+    "updated_at": "2026-08-31T00:00:00Z",
+    "version": 1
+  },
+  {
+    "category": "SEC",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.4.5 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.574255Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.574255Z",
+    "description": "An app distributed on the Mac App Store must declare the App Sandbox entitlement so it runs with restricted file system and system access.",
+    "detection": {
+      "applies_when": [
+        {
+          "key": "mac_app_store",
+          "value": true,
+          "when": "fact_equals"
+        }
+      ],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "entitlement_present",
+          "parameters": {
+            "key": "com.apple.security.app-sandbox"
+          }
+        }
+      ],
+      "targets": [
+        "entitlements"
+      ]
+    },
+    "interpretations": [
+      {
+        "evidence_ids": [],
+        "interpretation": "Any macOS target submitted to the Mac App Store must carry com.apple.security.app-sandbox set to true in its entitlements file.",
+        "likelihood": "high"
+      }
+    ],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "<key>com.apple.security.app-sandbox</key><true/> in App.entitlements"
+      ],
+      "forum_insights": [],
+      "summary": "Add the App Sandbox entitlement to the macOS target and request only the specific sandbox capabilities the app needs."
+    },
+    "rule_id": "AAPL-SEC-002",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.4.5",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.4.5"
+    },
+    "status": "validated",
+    "title": "Mac App Store apps must enable App Sandbox",
+    "updated_at": "2026-09-01T18:08:59.574255Z",
+    "version": 1
+  },
+  {
+    "category": "SEC",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.5.2 at document version 20260901T052521884Z-f9438536. Model confidence 0.50. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.574639Z"
+      },
+      {
+        "change": "Verification graded this rule overreach. It added 1 precondition(s), because the policy governs a kind of app and the rule did not say so.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification lowered the severity from warning to info, because the check cannot support the stronger claim.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule understated and named no fix that a pass can apply. A person must read it. Remove the blanket kids_category exclusion; instead only exempt apps that declare an educational-coding purpose AND expose/allow editing of the downloaded source code (e.g., a fact like 'educational_code_teaching_purpose' combined with a check for source viewability), rather than exempting the entire kids category.",
+        "date": "2026-09-01T00:00:00Z"
+      },
+      {
+        "change": "Verification graded this rule and named a fix that no pass could apply. Corrected by hand: a whole store category was exempt from a rule that has no such exemption.",
+        "date": "2026-09-01T22:41:27Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T02:04:29Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.574639Z",
+    "description": "Flags use of APIs that load or execute code at runtime, such as dlopen/dlsym, NSTask/posix_spawn, JSContext.evaluateScript, and Objective-C runtime class creation. These are the usual mechanisms for running code that was not compiled into the bundle and need review against the self-contained-bundle requirement. This check reads the use of a dynamic execution API. It cannot tell whether the code being run came from the bundle or from the network, and the guideline turns on exactly that.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": false,
+            "exclude": [
+              "**/Pods/**",
+              "**/Carthage/**",
+              "**/*Tests*/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm",
+              "**/*.c",
+              "**/*.cpp"
+            ],
+            "pattern": "\\b(dlopen|dlsym|NSCreateObjectFileImageFromMemory|NSLinkModule|posix_spawn|NSTask)\\s*\\("
+          }
+        },
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": false,
+            "exclude": [
+              "**/Pods/**",
+              "**/*Tests*/**"
+            ],
+            "expect_present": false,
+            "include": [
+              "**/*.swift",
+              "**/*.m",
+              "**/*.mm"
+            ],
+            "pattern": "evaluateScript\\s*\\(|evaluateJavaScript\\s*\\("
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Link the framework statically or as an embedded framework instead of calling dlopen on a downloaded binary.",
+        "Only pass evaluateJavaScript strings that are literals or bundled resources, never text fetched from a server."
+      ],
+      "forum_insights": [],
+      "summary": "Remove runtime code-loading APIs, or confirm the executed code ships inside the bundle and does not come from the network."
+    },
+    "rule_id": "AAPL-SEC-005",
+    "rule_type": "mechanical",
+    "severity": "info",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.5.2",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.5.2"
+    },
+    "status": "validated",
+    "title": "Dynamic code loading and interpreter APIs detected",
+    "updated_at": "2026-09-01T18:08:59.574639Z",
+    "version": 1
+  }
+]

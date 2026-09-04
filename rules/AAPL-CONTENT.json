@@ -1,0 +1,71 @@
+[
+  {
+    "category": "CONTENT",
+    "changelog": [
+      {
+        "change": "Compiled from apple-app-store-review-guidelines section 2.5.18 at document version 20260901T052521884Z-f9438536. Model confidence 0.60. Awaiting human review.",
+        "date": "2026-09-01T18:08:59.577942Z"
+      },
+      {
+        "change": "Promoted. Verification graded it accurate, and it raises no error finding on any of the published apps that ran it.",
+        "date": "2026-09-02T00:12:07Z"
+      }
+    ],
+    "created_at": "2026-09-01T18:08:59.577942Z",
+    "description": "Advertising code must live only in the main app target. Ad SDK imports or ad view classes found in app extensions, widgets, App Clips, keyboards, notification content targets, or watchOS targets violate this rule.",
+    "detection": {
+      "applies_when": [],
+      "interpretive_scope": [],
+      "mechanical_checks": [
+        {
+          "check_type": "regex_source",
+          "parameters": {
+            "case_insensitive": false,
+            "exclude": [],
+            "expect_present": false,
+            "include": [
+              "**/*Extension*/**/*.swift",
+              "**/*Extension*/**/*.m",
+              "**/*Widget*/**/*.swift",
+              "**/*Widgets*/**/*.swift",
+              "**/*AppClip*/**/*.swift",
+              "**/*Clip*/**/*.swift",
+              "**/*Keyboard*/**/*.swift",
+              "**/*WatchKit*/**/*.swift",
+              "**/*watchOS*/**/*.swift",
+              "**/*NotificationContent*/**/*.swift",
+              "**/*NotificationService*/**/*.swift"
+            ],
+            "pattern": "(?:import\\s+(?:GoogleMobileAds|AppLovinSDK|FBAudienceNetwork|UnityAds|AdSupport|IronSource|Chartboost|Vungle|InMobiSDK|MoPub)|GADBannerView|GADInterstitialAd|MAAdView|FBAdView|@import\\s+GoogleMobileAds)"
+          }
+        }
+      ],
+      "targets": [
+        "source"
+      ]
+    },
+    "interpretations": [],
+    "overridable": true,
+    "platform": "ios",
+    "remediation": {
+      "examples": [
+        "Delete `import GoogleMobileAds` and any GADBannerView setup from MyWidget/MyWidgetView.swift and render static content instead."
+      ],
+      "forum_insights": [],
+      "summary": "Move all advertising code and ad SDK dependencies into the main app target and remove them from extension, widget, App Clip, keyboard, and watchOS targets."
+    },
+    "rule_id": "AAPL-CONTENT-036",
+    "rule_type": "mechanical",
+    "severity": "error",
+    "source": {
+      "document": "apple-app-store-review-guidelines",
+      "document_version": "20260901T052521884Z-f9438536",
+      "section": "2.5.18",
+      "url": "https://developer.apple.com/app-store/review/guidelines/#2.5.18"
+    },
+    "status": "validated",
+    "title": "No ad SDK usage outside the main app binary",
+    "updated_at": "2026-09-01T18:08:59.577942Z",
+    "version": 1
+  }
+]
