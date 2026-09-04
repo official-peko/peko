@@ -1,3 +1,7 @@
 /target
 **/*.rs.bk
 .DS_Store
+
+# The curated dependency knowledge lives in the platform repository.
+# The loader here reads a directory a caller names at runtime.
+/knowledge
