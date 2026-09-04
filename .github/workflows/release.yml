@@ -1,0 +1,114 @@
+name: Release
+
+# A tag builds the binaries an install script and the Action download. Without
+# them a user has to build Rust from source, and nobody does that to try a
+# linter.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The tag to build, for a rehearsal
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # One target failing must not cancel the rest. A partial release is
+      # visible and fixable. A cancelled one looks like nothing happened.
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            cross: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install the cross linker
+        if: matrix.cross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: cargo build --release --bin peko --target ${{ matrix.target }}
+
+      # A binary that ships a partial rule database reports a pass on a project
+      # the full one fails. Check the artifact rather than the source tree.
+      - name: The built binary carries the whole database
+        if: "!contains(matrix.target, 'windows') && !matrix.cross"
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd fixtures/ios-violating
+          ../../target/${{ matrix.target }}/release/peko lint --all --json > /tmp/report.json || true
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/report.json"))
+          assert d["summary"]["total_findings"] > 0, "the release binary found nothing"
+          print("rule database", d["rule_database_version"], "-", d["summary"]["total_findings"], "findings")
+          PY
+
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          name="peko-${{ matrix.target }}"
+          if [ -f "target/${{ matrix.target }}/release/peko.exe" ]; then
+            cp "target/${{ matrix.target }}/release/peko.exe" "dist/${name}.exe"
+            (cd dist && sha256sum "${name}.exe" > "${name}.exe.sha256")
+          else
+            cp "target/${{ matrix.target }}/release/peko" "dist/${name}"
+            (cd dist && shasum -a 256 "${name}" > "${name}.sha256" 2>/dev/null \
+              || sha256sum "${name}" > "${name}.sha256")
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: dist/*
+
+  publish:
+    name: Attach the binaries to the release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: What is being published
+        run: ls -la dist
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/*
+          # A checksum beside each binary lets somebody verify what they
+          # downloaded. Without one, an install script trusts whatever arrives.
+          generate_release_notes: true

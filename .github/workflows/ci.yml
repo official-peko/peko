@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: Format, lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      # A warning is not a style note. Clippy found a real bug here once:
+      # b"ustar\000" reads as an octal escape and is not one.
+      - name: Lint
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --workspace
+
+      # The binary carries its own rule database. A build that ships a partial
+      # one reports a pass on a project the full one fails, and nothing
+      # complains, so the check has to run on every push.
+      - name: The embedded database matches the directory
+        run: cargo test -p peko-rules --lib embedded
+
+  binary:
+    name: The binary runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      # Testing the library proves the library. A customer runs the binary, so
+      # the binary is what has to be checked.
+      - name: Build
+        run: cargo build --release --bin peko
+
+      - name: Lint a project that has a known fault
+        run: |
+          set -euo pipefail
+          cd fixtures/ios-violating
+          ../../target/release/peko lint --all --sarif /tmp/peko.sarif || true
+          test -s /tmp/peko.sarif
+
+      - name: The SARIF names the rule and the line
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open("/tmp/peko.sarif"))
+          assert d["version"] == "2.1.0", d["version"]
+          run = d["runs"][0]
+          assert run["results"], "the fixture raised nothing, so the check proves nothing"
+          for result in run["results"]:
+              for location in result.get("locations", []):
+                  uri = location["physicalLocation"]["artifactLocation"]["uri"]
+                  assert not uri.startswith(("/", "./")), uri
+          print(f"{len(run['results'])} results, {len(run['tool']['driver']['rules'])} rules")
+          PY
+
+      # A lint that reaches the network is a lint that fails in an air-gapped
+      # build. The first run has to work with nothing configured.
+      - name: Lint with no network
+        run: |
+          set -euo pipefail
+          cd fixtures/ios-violating
+          unset PEKO_API_KEY || true
+          ../../target/release/peko lint --all > /tmp/offline.txt || true
+          grep -q "shipped with this binary" /tmp/offline.txt

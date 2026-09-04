@@ -13,6 +13,30 @@ peko lint --all
 
 The first run works offline. The rule database ships inside the binary.
 
+## In a pull request
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peko-ui/peko@v1
+        with:
+          version: v1.0.0
+```
+
+Every finding lands on the line it belongs to, in the diff, through GitHub
+Code Scanning. The mechanical checks run on the runner, so this needs no
+account and no key.
+
+Pin the version. A new rule that fails a build which passed yesterday, with
+nobody changing anything, is how a check gets switched off.
+
 ## What is here
 
 | Crate | What it does |
