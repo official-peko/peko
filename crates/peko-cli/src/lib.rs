@@ -13,6 +13,7 @@ pub mod config;
 pub mod gather;
 pub mod local;
 pub mod render;
+pub mod update;
 
 use anyhow::{Context, Result};
 pub use config::Config;
@@ -135,16 +136,24 @@ fn lint_locally(
             println!("Nothing changed since {since}. Checking the whole project.");
         }
     }
-    let report = local::lint(root, &config.platform)?;
+    let (_, source) = update::database(Some(&config.api_url))?;
+    let report = local::lint(root, &config.platform, Some(&config.api_url))?;
     if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
         return Ok(render::exit_code(&report, fail_on));
     }
     print!("{}", render::report(&report));
+    let origin = match source {
+        update::Source::Embedded => "shipped with this binary",
+        update::Source::Cache => "cached from an earlier fetch",
+        update::Source::Fetched => "fetched and signature checked",
+    };
     println!(
-        "\nChecked on this machine with rule database {}. The audit tier needs \
-         a key: run `peko login`.",
-        local::database_version()
+        "\nChecked on this machine with rule database {} ({origin}). The audit \
+         tier needs a key: run `peko login`.",
+        report["rule_database_version"]
+            .as_str()
+            .unwrap_or("unknown")
     );
     print!("{}", render::unanswered(&report));
     if allow_undecided || !render::has_unanswered(&report) {

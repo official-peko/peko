@@ -12,6 +12,7 @@ pub mod facts;
 pub mod id;
 pub mod platform;
 pub mod schema;
+pub mod signed;
 pub mod validate;
 
 pub use category::Category;

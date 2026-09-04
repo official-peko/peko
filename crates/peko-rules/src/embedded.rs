@@ -26,7 +26,10 @@ pub const MANIFEST_JSON: &str = include_str!("../../../rules/manifest.json");
 /// globs silently ships fewer rules when a file is renamed, and nothing fails.
 pub const RULE_FILES: &[(&str, &str)] = &[
     ("AAPL-API", include_str!("../../../rules/AAPL-API.json")),
-    ("AAPL-CONTENT", include_str!("../../../rules/AAPL-CONTENT.json")),
+    (
+        "AAPL-CONTENT",
+        include_str!("../../../rules/AAPL-CONTENT.json"),
+    ),
     ("AAPL-DATA", include_str!("../../../rules/AAPL-DATA.json")),
     ("AAPL-LEGAL", include_str!("../../../rules/AAPL-LEGAL.json")),
     ("AAPL-META", include_str!("../../../rules/AAPL-META.json")),

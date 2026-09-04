@@ -150,7 +150,28 @@ fn lint_without_a_key_runs_here_and_sends_nothing() {
     let code = peko_cli::lint(&root, true, "HEAD", None, false, "error", false)
         .expect("a run with no key still works");
     assert_eq!(code, 1, "the fixture holds an error finding");
-    assert_eq!(server.hits(), 0, "a local run reached the server");
+
+    // A local run does reach the server, to ask for a newer rule database.
+    // The property that matters is narrower and stronger than "no request":
+    // the project never leaves the machine. So every request must be a GET
+    // for the database, with no body, and never a POST of the source.
+    for seen in server.requests() {
+        assert_eq!(
+            seen.method, "GET",
+            "a local run sent a {} request",
+            seen.method
+        );
+        assert!(
+            seen.path.contains("/rules/"),
+            "a local run asked for {} rather than the rule database",
+            seen.path
+        );
+        assert!(
+            seen.body.is_empty(),
+            "a local run sent a body: {}",
+            seen.body
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------

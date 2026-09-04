@@ -27,9 +27,11 @@ use std::path::Path;
 ///
 /// Returns an error when the embedded database is broken or the project will
 /// not load.
-pub fn lint(root: &Path, platform: &str) -> Result<serde_json::Value> {
-    let database =
-        peko_rules::embedded::database().context("the rule database in this binary is broken")?;
+pub fn lint(root: &Path, platform: &str, base_url: Option<&str>) -> Result<serde_json::Value> {
+    // Take a newer database when one is available and it verifies. Every
+    // failure falls back to the one compiled in, so a run offline, behind a
+    // proxy, or against a bad signature still checks the project.
+    let (database, _source) = crate::update::database(base_url)?;
     let platform: peko_rules::Platform = platform
         .parse()
         .map_err(|_| anyhow::anyhow!("unknown platform {platform:?}. Use ios or android."))?;
@@ -85,7 +87,7 @@ mod tests {
 </dict></plist>"#,
         )
         .expect("write");
-        let report = lint(&root, "ios").expect("the run finishes");
+        let report = lint(&root, "ios", None).expect("the run finishes");
         assert_eq!(report["tier"], "lint");
         assert!(report["summary"]["total_findings"].is_number());
         let _ = std::fs::remove_dir_all(&root);
@@ -98,7 +100,7 @@ mod tests {
         // this field.
         let root = scratch("version");
         std::fs::write(root.join("Info.plist"), "<plist><dict/></plist>").expect("write");
-        let report = lint(&root, "ios").expect("the run finishes");
+        let report = lint(&root, "ios", None).expect("the run finishes");
         assert_eq!(
             report["rule_database_version"].as_str(),
             Some(database_version().as_str())
@@ -109,7 +111,7 @@ mod tests {
     #[test]
     fn an_unknown_platform_is_refused_rather_than_guessed() {
         let root = scratch("platform");
-        let error = lint(&root, "web").expect_err("web is not a platform");
+        let error = lint(&root, "web", None).expect_err("web is not a platform");
         assert!(error.to_string().contains("unknown platform"));
         let _ = std::fs::remove_dir_all(&root);
     }
