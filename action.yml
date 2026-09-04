@@ -78,9 +78,9 @@ runs:
 
         version="${{ inputs.version }}"
         if [ "$version" = "latest" ]; then
-          base="https://github.com/peko-ui/peko/releases/latest/download"
+          base="https://github.com/official-peko/peko/releases/latest/download"
         else
-          base="https://github.com/peko-ui/peko/releases/download/${version}"
+          base="https://github.com/official-peko/peko/releases/download/${version}"
         fi
 
         mkdir -p "$RUNNER_TEMP/peko"

@@ -145,7 +145,7 @@ pub fn render(report: &Report) -> Value {
             "tool": {
                 "driver": {
                     "name": "Peko",
-                    "informationUri": "https://github.com/peko-ui/peko",
+                    "informationUri": "https://github.com/official-peko/peko",
                     "version": report.tool_version,
                     "semanticVersion": report.tool_version,
                     "rules": rules.into_values().collect::<Vec<_>>(),

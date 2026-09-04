@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: peko-ui/peko@v1
+      - uses: official-peko/peko@v1
         with:
           version: v1.0.0
 ```

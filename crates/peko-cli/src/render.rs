@@ -329,7 +329,7 @@ mod estimate_tests {
     #[test]
     fn the_price_comes_before_the_problems() {
         let body = json!({
-            "summary": "4 rules would read your code, about $0.42 with claude-sonnet-5",
+            "summary": "4 rules would read your code, about $0.42",
             "rules": [],
             "cached": [],
             "blockers": [{"reason": "lint_failing", "message": "The free checks report 2 errors."}],

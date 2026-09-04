@@ -251,7 +251,7 @@ fn lint_without_a_key_runs_here_and_sends_nothing() {
 
 fn estimate_answer(cost: f64, blockers: &serde_json::Value) -> String {
     serde_json::json!({
-        "model": "claude-sonnet-5",
+        "model": "the audit model",
         "rules": [{"rule_id": "AAPL-PRIV-001", "title": "a rule",
                    "files": ["App/View.swift"], "total_chars": 100,
                    "dropped": 0, "estimated_cost_usd": cost}],

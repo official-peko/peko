@@ -25,7 +25,7 @@ rust-version = "1.85"
 license = "Apache-2.0"
 publish = false
 authors = ["Peko UI Technologies LLC"]
-repository = "https://github.com/peko-ui/peko"
+repository = "https://github.com/official-peko/peko"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
