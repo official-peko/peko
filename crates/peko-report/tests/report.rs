@@ -181,7 +181,11 @@ fn an_audit_whose_model_never_ran_is_not_a_pass() {
         !report.summary.pass,
         "an audit that did not run its interpretive half reported a pass"
     );
-    assert_ne!(report.exit_code(), 0, "a gate reading this would let it through");
+    assert_ne!(
+        report.exit_code(),
+        0,
+        "a gate reading this would let it through"
+    );
     assert!(
         report
             .coverage
