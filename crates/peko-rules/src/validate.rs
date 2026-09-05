@@ -231,6 +231,20 @@ fn validate_check(
     };
 
     match check {
+        MechanicalCheck::BundleEntry { pattern, .. } => {
+            if pattern.trim().is_empty() {
+                push("pattern must not be empty".into());
+            }
+            // A pattern with no slash matches an entry at the root of the
+            // archive and nothing else, which is almost never what a rule
+            // means. Every path in an ipa starts Payload/ and in an aab
+            // base/.
+            if !pattern.contains('/') {
+                push(format!(
+                    "pattern {pattern} names no directory, so it matches only the root of the archive"
+                ));
+            }
+        }
         MechanicalCheck::ManifestKeyPresent { file, key }
         | MechanicalCheck::ManifestKeyContains { file, key, .. }
         | MechanicalCheck::ManifestKeyAbsent { file, key } => {

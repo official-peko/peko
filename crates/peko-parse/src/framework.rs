@@ -53,17 +53,23 @@ impl Framework {
     ///
     /// False means a report about this project would rest on a fraction of
     /// what it links, so the run says so rather than reporting a pass.
+    ///
+    /// Capacitor is on the list because its manifest is `package.json`, which
+    /// is parsed. Unity keeps its packages in `Packages/manifest.json` and
+    /// vendors the rest into `Assets/Plugins` with no manifest at all, so
+    /// nothing here reads them.
     #[must_use]
     pub fn dependencies_are_read(self) -> bool {
-        matches!(
-            self,
+        match self {
             Framework::Native
-                | Framework::Flutter
-                | Framework::ReactNative
-                | Framework::Expo
-                | Framework::Maui
-                | Framework::KotlinMultiplatform
-        )
+            | Framework::Flutter
+            | Framework::ReactNative
+            | Framework::Expo
+            | Framework::Capacitor
+            | Framework::Maui
+            | Framework::KotlinMultiplatform => true,
+            Framework::Unity | Framework::Unknown => false,
+        }
     }
 }
 
@@ -182,10 +188,15 @@ mod tests {
     }
 
     #[test]
-    fn unity_and_capacitor_dependencies_are_known_to_be_unread() {
-        assert!(!Framework::Unity.dependencies_are_read());
-        assert!(!Framework::Capacitor.dependencies_are_read());
-        assert!(!Framework::Unknown.dependencies_are_read());
+    fn a_framework_is_read_only_when_its_manifest_is_parsed() {
+        // Capacitor's manifest is package.json, which is parsed, so a
+        // Capacitor rule can fire. A gate naming a framework the coverage
+        // check refuses is a rule that can never run.
+        assert!(Framework::Capacitor.dependencies_are_read());
         assert!(Framework::Flutter.dependencies_are_read());
+        assert!(Framework::Maui.dependencies_are_read());
+        // Unity vendors plugins into Assets with no manifest at all.
+        assert!(!Framework::Unity.dependencies_are_read());
+        assert!(!Framework::Unknown.dependencies_are_read());
     }
 }

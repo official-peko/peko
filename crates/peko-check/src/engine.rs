@@ -416,6 +416,16 @@ fn run_check(
             warnings,
             findings,
         ),
+        MechanicalCheck::BundleEntry {
+            pattern,
+            expect_present,
+        } => Ok(check_bundle_entry(
+            rule,
+            project,
+            pattern,
+            *expect_present,
+            findings,
+        )),
         MechanicalCheck::ApiUsage {
             symbol,
             expect_present,
@@ -684,6 +694,47 @@ fn check_key_contains(
 
 /// Entitlement keys contain dots, so they read as literal top level keys, not
 /// as key paths.
+/// Whether the built app holds an entry matching a glob.
+///
+/// Returns false when there is no bundle, which counts the rule as skipped.
+/// A rule that asks what shipped cannot be answered from a repository, and
+/// answering it anyway is how a report claims more than it knows. Every other
+/// place in this file takes the same position.
+fn check_bundle_entry(
+    rule: &Rule,
+    project: &Project,
+    pattern: &str,
+    expect_present: bool,
+    findings: &mut Vec<Finding>,
+) -> bool {
+    let Some(bundle) = project.bundle.as_ref() else {
+        return false;
+    };
+    let Ok(glob) = globset::Glob::new(pattern) else {
+        return false;
+    };
+    let matcher = glob.compile_matcher();
+    let found = bundle
+        .entries
+        .iter()
+        .any(|entry| matcher.is_match(entry.as_str()));
+
+    if found != expect_present {
+        findings.push(Finding::mechanical(
+            rule.rule_id,
+            rule.severity,
+            "bundle_entry",
+            if expect_present {
+                format!("The built app holds no entry matching {pattern}")
+            } else {
+                format!("The built app holds an entry matching {pattern}")
+            },
+            None,
+        ));
+    }
+    true
+}
+
 fn check_entitlement(
     rule: &Rule,
     project: &Project,
@@ -1392,4 +1443,114 @@ pub fn severity_counts(findings: &[Finding]) -> HashMap<Severity, usize> {
         *counts.entry(finding.severity).or_insert(0) += 1;
     }
     counts
+}
+
+#[cfg(test)]
+mod bundle_tests {
+    use super::*;
+    use peko_parse::bundle::Bundle;
+    use std::collections::BTreeMap;
+
+    /// A bundle holding the entries a test names, and nothing else.
+    fn bundle_with(entries: &[&str]) -> Bundle {
+        Bundle {
+            info_plist: BTreeMap::new(),
+            privacy_manifest: None,
+            frameworks: Vec::new(),
+            abis: Vec::new(),
+            entries: entries.iter().map(ToString::to_string).collect(),
+            has_provisioning_profile: false,
+        }
+    }
+
+    fn project() -> Project {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(std::path::Path::parent)
+            .expect("the repository root")
+            .join("fixtures/ios-compliant");
+        let config = crate::PekoConfig::new(peko_rules::Platform::Ios);
+        Project::load(&root, &config).expect("the fixture loads")
+    }
+
+    fn rule() -> Rule {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(std::path::Path::parent)
+            .expect("the repository root")
+            .join("rules");
+        let database = peko_rules::RuleDatabase::load_from_dir(root).expect("the database loads");
+        database
+            .rules()
+            .iter()
+            .find(|rule| rule.rule_type == peko_rules::RuleType::Mechanical)
+            .expect("a mechanical rule")
+            .clone()
+    }
+
+    #[test]
+    fn no_bundle_leaves_the_rule_undecided_rather_than_passing() {
+        // The whole point. A rule that asks what shipped cannot be answered
+        // from a repository, and a pass here is a claim nobody checked.
+        let mut project = project();
+        project.bundle = None;
+        let mut findings = Vec::new();
+        let decided = check_bundle_entry(
+            &rule(),
+            &project,
+            "Payload/*.app/main.jsbundle",
+            true,
+            &mut findings,
+        );
+        assert!(!decided, "no bundle must leave the rule undecided");
+        assert!(findings.is_empty(), "an undecided rule raises nothing");
+    }
+
+    #[test]
+    fn an_entry_that_is_there_raises_nothing() {
+        let mut project = project();
+        project.bundle = Some(bundle_with(&[
+            "Payload/App.app/Info.plist",
+            "Payload/App.app/main.jsbundle",
+        ]));
+        let mut findings = Vec::new();
+        assert!(check_bundle_entry(
+            &rule(),
+            &project,
+            "Payload/*.app/main.jsbundle",
+            true,
+            &mut findings
+        ));
+        assert!(findings.is_empty());
+    }
+
+    #[test]
+    fn an_entry_that_should_not_be_there_is_reported() {
+        let mut project = project();
+        project.bundle = Some(bundle_with(&["Payload/App.app/main.jsbundle"]));
+        let mut findings = Vec::new();
+        assert!(check_bundle_entry(
+            &rule(),
+            &project,
+            "Payload/*.app/main.jsbundle",
+            false,
+            &mut findings
+        ));
+        assert_eq!(findings.len(), 1);
+    }
+
+    #[test]
+    fn a_glob_that_matches_nothing_reports_the_absence() {
+        let mut project = project();
+        project.bundle = Some(bundle_with(&["Payload/App.app/Info.plist"]));
+        let mut findings = Vec::new();
+        assert!(check_bundle_entry(
+            &rule(),
+            &project,
+            "base/lib/*/libflutter.so",
+            true,
+            &mut findings
+        ));
+        assert_eq!(findings.len(), 1);
+    }
 }

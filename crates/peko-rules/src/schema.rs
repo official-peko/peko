@@ -307,6 +307,22 @@ pub enum MechanicalCheck {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         max_matches: Option<usize>,
     },
+    /// A path inside the built bundle exists, or does not.
+    ///
+    /// The source tree does not always hold the answer. An Expo project keeps
+    /// no `ios/` directory, a Unity project keeps its settings in a YAML asset
+    /// that nothing here parses, and a MAUI project puts half its
+    /// configuration in `MSBuild` properties. What ships is in the `.ipa` or the
+    /// `.aab` whatever the repository looks like.
+    ///
+    /// `pattern` is a glob over the archive entries, for example
+    /// `Payload/*.app/main.jsbundle`.
+    BundleEntry {
+        pattern: String,
+        /// Reverse the reading. See `regex_source`.
+        #[serde(default)]
+        expect_present: bool,
+    },
     /// A specific API symbol appears in source.
     ///
     /// `require_any_import` cuts false positives: when the list is not empty,
@@ -359,6 +375,7 @@ impl MechanicalCheck {
             MechanicalCheck::ManifestKeyAbsent { .. } => "manifest_key_absent",
             MechanicalCheck::ManifestKeyValue { .. } => "manifest_key_value",
             MechanicalCheck::ManifestKeyContains { .. } => "manifest_key_contains",
+            MechanicalCheck::BundleEntry { .. } => "bundle_entry",
             MechanicalCheck::EntitlementPresent { .. } => "entitlement_present",
             MechanicalCheck::EntitlementAbsent { .. } => "entitlement_absent",
             MechanicalCheck::RegexSource { .. } => "regex_source",
@@ -377,6 +394,7 @@ impl MechanicalCheck {
             | MechanicalCheck::ManifestKeyValue { .. }
             | MechanicalCheck::ManifestKeyContains { .. }
             | MechanicalCheck::PrivacyManifest { .. } => Target::Manifest,
+            MechanicalCheck::BundleEntry { .. } => Target::Asset,
             MechanicalCheck::EntitlementPresent { .. }
             | MechanicalCheck::EntitlementAbsent { .. } => Target::Entitlements,
             MechanicalCheck::RegexSource { .. } | MechanicalCheck::ApiUsage { .. } => {

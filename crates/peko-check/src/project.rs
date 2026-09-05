@@ -44,6 +44,14 @@ pub struct Project {
     /// privacy manifest belongs to that target.
     pub xcode_projects: Vec<XcodeProject>,
     pub gradle_settings: Vec<ConfigDocument>,
+    /// The built app, when one was given.
+    ///
+    /// The source tree does not always hold the answer. An Expo project keeps
+    /// no ios directory, and a Unity project keeps its settings in a YAML
+    /// asset nothing here parses. What ships is in the archive whatever the
+    /// repository looks like. `None` when nobody supplied one, and then a
+    /// rule that reads the bundle is undecided rather than answered.
+    pub bundle: Option<peko_parse::bundle::Bundle>,
     /// Manifests and config files, as text, for a rule that names one.
     ///
     /// Separate from `sources` on purpose. A rule scope naming
@@ -127,6 +135,7 @@ impl Project {
             xcode_projects: Vec::new(),
             gradle_settings: Vec::new(),
             readable_documents: Vec::new(),
+            bundle: None,
             gradle_project: GradleProject::default(),
             primary_android_manifest: None,
             dependencies: Vec::new(),

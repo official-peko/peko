@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn the_refusal_says_how_to_override_it() {
-        let refusal = readable(Framework::Capacitor, 10, 0).expect_err("must refuse");
+        let refusal = readable(Framework::Unity, 10, 0).expect_err("must refuse");
         assert!(
             refusal.message().contains(".pekorc.json"),
             "a refusal a person cannot get past is a wall"
