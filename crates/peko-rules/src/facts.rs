@@ -87,6 +87,17 @@ pub const FACTS: &[Fact] = &[
         default: None,
     },
     Fact {
+        name: "framework",
+        kind: Kind::Derived,
+        shape: Shape::Text,
+        question: "Which framework built this app?",
+        aliases: &["cross_platform_framework"],
+        // No default. A guess of "native" would run every native rule against
+        // a project nobody read, and report a pass. Undecided is the honest
+        // answer and it keeps a gated rule silent.
+        default: None,
+    },
+    Fact {
         name: "mac_app_store",
         kind: Kind::Declared,
         shape: Shape::Bool,

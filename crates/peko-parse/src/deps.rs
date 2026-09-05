@@ -279,6 +279,158 @@ fn push_coordinate(out: &mut Vec<Dependency>, coordinate: &str, path: &Path, lin
     ));
 }
 
+/// Parse `pubspec.lock`, the resolved Dart package list.
+///
+/// Flutter resolves packages into a cache outside the project, so unlike a
+/// native project there is nothing on disk to fall back to. This file is the
+/// only record of what the app links.
+///
+/// Only direct dependencies count. The file marks each entry with a
+/// `dependency:` line, and `direct main` is the one that ships. `direct dev`
+/// is a test dependency and `transitive` is pulled in by another package.
+#[must_use]
+pub fn parse_pubspec_lock(path: &Path, text: &str) -> Vec<Dependency> {
+    let mut out = Vec::new();
+    let mut inside = false;
+    let mut name: Option<(String, usize)> = None;
+    let mut scope = Scope::Ships;
+    let mut keep = false;
+    let mut version: Option<String> = None;
+
+    let flush = |out: &mut Vec<Dependency>,
+                 name: &mut Option<(String, usize)>,
+                 version: &mut Option<String>,
+                 keep: &mut bool,
+                 scope: Scope| {
+        if let (Some((package, line)), true) = (name.take(), *keep) {
+            let mut dependency =
+                Dependency::new(Ecosystem::Pub, package, version.take(), path, Some(line));
+            dependency.scope = scope;
+            out.push(dependency);
+        }
+        *keep = false;
+        *version = None;
+    };
+
+    for (index, raw) in text.lines().enumerate() {
+        if raw.starts_with("packages:") {
+            inside = true;
+            continue;
+        }
+        if !inside {
+            continue;
+        }
+        // A line with no indent ends the packages block. `sdks:` follows it.
+        if !raw.starts_with(' ') && !raw.trim().is_empty() {
+            break;
+        }
+        let indent = raw.len() - raw.trim_start().len();
+        let trimmed = raw.trim();
+
+        if indent == 2 && trimmed.ends_with(':') {
+            flush(&mut out, &mut name, &mut version, &mut keep, scope);
+            scope = Scope::Ships;
+            name = Some((trimmed.trim_end_matches(':').to_string(), index + 1));
+            continue;
+        }
+        if let Some(value) = trimmed.strip_prefix("dependency: ") {
+            let value = value.trim().trim_matches('"');
+            keep = value.starts_with("direct");
+            // A dev dependency builds and tests. It reaches no user, so it
+            // belongs on no privacy form.
+            scope = if value == "direct dev" {
+                Scope::TestOnly
+            } else {
+                Scope::Ships
+            };
+            continue;
+        }
+        if let Some(value) = trimmed.strip_prefix("version: ") {
+            version = Some(value.trim().trim_matches('"').to_string());
+        }
+    }
+    flush(&mut out, &mut name, &mut version, &mut keep, scope);
+    out
+}
+
+/// Parse `package.json` for the packages a project declares.
+///
+/// `dependencies` ship. `devDependencies` build and test, so they are marked
+/// test only rather than dropped, which is how the Gradle parser treats the
+/// same distinction.
+///
+/// # Errors
+///
+/// Returns an error when the file is not JSON.
+pub fn parse_package_json(path: &Path, text: &str) -> Result<Vec<Dependency>> {
+    let root: serde_json::Value =
+        serde_json::from_str(text).map_err(|source| ParseError::Json {
+            path: path.to_path_buf(),
+            source,
+        })?;
+
+    let mut out = Vec::new();
+    for (key, scope) in [
+        ("dependencies", Scope::Ships),
+        ("devDependencies", Scope::TestOnly),
+    ] {
+        let Some(map) = root.get(key).and_then(serde_json::Value::as_object) else {
+            continue;
+        };
+        for (name, value) in map {
+            let mut dependency = Dependency::new(
+                Ecosystem::Npm,
+                name.clone(),
+                value.as_str().map(ToString::to_string),
+                path,
+                None,
+            );
+            dependency.scope = scope;
+            out.push(dependency);
+        }
+    }
+    Ok(out)
+}
+
+/// Parse a `.csproj` for its `PackageReference` entries.
+///
+/// A .NET project names its packages inline, and `packages.lock.json` exists
+/// only when a project opts into it, so this is the file that is always there.
+#[must_use]
+pub fn parse_csproj(path: &Path, text: &str) -> Vec<Dependency> {
+    let mut out = Vec::new();
+    for (index, line) in text.lines().enumerate() {
+        let trimmed = line.trim();
+        if !trimmed.starts_with("<PackageReference") {
+            continue;
+        }
+        let Some(name) = attribute(trimmed, "Include") else {
+            continue;
+        };
+        out.push(Dependency::new(
+            Ecosystem::NuGet,
+            name,
+            attribute(trimmed, "Version"),
+            path,
+            Some(index + 1),
+        ));
+    }
+    out
+}
+
+/// Read one XML attribute out of a tag. Single and double quotes both occur
+/// in a project file written by hand.
+fn attribute(tag: &str, key: &str) -> Option<String> {
+    let at = tag.find(&format!("{key}="))? + key.len() + 1;
+    let rest = &tag[at..];
+    let quote = rest.chars().next()?;
+    if quote != '"' && quote != '\'' {
+        return None;
+    }
+    let end = rest[1..].find(quote)? + 1;
+    Some(rest[1..end].to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -379,5 +531,100 @@ core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.13.1" }
         let ids: Vec<&str> = deps.iter().map(|d| d.package_id.as_str()).collect();
         assert!(ids.contains(&"gradle:com.squareup.okhttp3:okhttp"));
         assert!(ids.contains(&"gradle:androidx.core:core-ktx"));
+    }
+
+    #[test]
+    fn a_pubspec_lock_reports_direct_packages_only() {
+        // Flutter resolves into a cache outside the project, so this file is
+        // the only record. A transitive entry is somebody else's choice and
+        // does not belong on the direct list.
+        let text = "\
+# Generated by pub
+packages:
+  firebase_core:
+    dependency: \"direct main\"
+    description:
+      name: firebase_core
+    source: hosted
+    version: \"2.24.2\"
+  meta:
+    dependency: transitive
+    source: hosted
+    version: \"1.10.0\"
+  flutter_test:
+    dependency: \"direct dev\"
+    source: sdk
+    version: \"0.0.0\"
+sdks:
+  dart: \">=3.0.0 <4.0.0\"
+";
+        let found = parse_pubspec_lock(Path::new("pubspec.lock"), text);
+        let names: Vec<&str> = found.iter().map(|d| d.name.as_str()).collect();
+        assert_eq!(names, vec!["firebase_core", "flutter_test"]);
+        assert_eq!(found[0].version.as_deref(), Some("2.24.2"));
+        assert_eq!(found[0].scope, Scope::Ships);
+        // A dev dependency builds and tests. It reaches no user, so it is on
+        // no privacy form.
+        assert_eq!(found[1].scope, Scope::TestOnly);
+        assert_eq!(found[0].ecosystem, Ecosystem::Pub);
+    }
+
+    #[test]
+    fn a_pubspec_lock_stops_at_the_end_of_the_packages_block() {
+        // sdks: follows packages: and is not a package. Reading it as one
+        // would put "dart" on the dependency list.
+        let text = "packages:\n  http:\n    dependency: \"direct main\"\n    version: \"1.0.0\"\nsdks:\n  dart: \">=3.0.0\"\n";
+        let found = parse_pubspec_lock(Path::new("pubspec.lock"), text);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].name, "http");
+    }
+
+    #[test]
+    fn package_json_separates_what_ships_from_what_tests() {
+        let text = r#"{
+          "name": "app",
+          "dependencies": { "react-native": "0.73.2", "@sentry/react-native": "5.15.0" },
+          "devDependencies": { "jest": "29.7.0" }
+        }"#;
+        let found = parse_package_json(Path::new("package.json"), text).expect("parses");
+        let ships: Vec<&str> = found
+            .iter()
+            .filter(|d| d.scope == Scope::Ships)
+            .map(|d| d.name.as_str())
+            .collect();
+        assert!(ships.contains(&"react-native"));
+        // A scoped name is one package, not two.
+        assert!(ships.contains(&"@sentry/react-native"));
+        assert_eq!(ships.len(), 2);
+        let tests: Vec<&str> = found
+            .iter()
+            .filter(|d| d.scope == Scope::TestOnly)
+            .map(|d| d.name.as_str())
+            .collect();
+        assert_eq!(tests, vec!["jest"]);
+    }
+
+    #[test]
+    fn a_package_json_that_is_not_json_is_an_error_not_an_empty_list() {
+        // An empty list reads as "this app depends on nothing", which is a
+        // worse answer than a refusal.
+        assert!(parse_package_json(Path::new("package.json"), "{ oops").is_err());
+    }
+
+    #[test]
+    fn a_csproj_reports_its_package_references() {
+        let text = r#"<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
+    <PackageReference Include='Plugin.Firebase' Version='2.0.5' />
+    <Reference Include="System.Net" />
+  </ItemGroup>
+</Project>"#;
+        let found = parse_csproj(Path::new("App.csproj"), text);
+        let names: Vec<&str> = found.iter().map(|d| d.name.as_str()).collect();
+        // Reference is not PackageReference and must not be counted.
+        assert_eq!(names, vec!["CommunityToolkit.Maui", "Plugin.Firebase"]);
+        assert_eq!(found[1].version.as_deref(), Some("2.0.5"));
+        assert_eq!(found[0].ecosystem, Ecosystem::NuGet);
     }
 }

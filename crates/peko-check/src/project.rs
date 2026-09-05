@@ -26,6 +26,12 @@ pub struct ConfigDocument {
 pub struct Project {
     pub root: PathBuf,
     pub platform: Platform,
+    /// Which framework built the app.
+    ///
+    /// Not a platform. A Flutter app ships an .ipa to Apple and every Apple
+    /// rule applies to it. This decides which files hold the dependency graph
+    /// and which rules mean something different.
+    pub framework: peko_parse::framework::Framework,
     pub name: String,
     pub bundle_id: Option<String>,
     pub package_name: Option<String>,
@@ -38,6 +44,14 @@ pub struct Project {
     /// privacy manifest belongs to that target.
     pub xcode_projects: Vec<XcodeProject>,
     pub gradle_settings: Vec<ConfigDocument>,
+    /// Manifests and config files, as text, for a rule that names one.
+    ///
+    /// Separate from `sources` on purpose. A rule scope naming
+    /// `**/Info.plist` matched nothing, because the audit globs `sources` and
+    /// a manifest never lands there. Putting manifests into `sources` instead
+    /// would feed plist and manifest XML to the symbol scans in `derive`,
+    /// where a string in a plist would read as a call in code.
+    pub readable_documents: Vec<SourceFile>,
     /// The parsed Gradle module graph. It says which module owns a file, which
     /// module builds the shipped APK, and which source sets never ship.
     pub gradle_project: GradleProject,
@@ -95,6 +109,13 @@ impl Project {
         let mut project = Self {
             root: root.to_path_buf(),
             platform: config.platform,
+            framework: peko_parse::framework::detect(
+                &discovery
+                    .files
+                    .iter()
+                    .map(|file| file.path.strip_prefix(root).unwrap_or(&file.path))
+                    .collect::<Vec<_>>(),
+            ),
             name,
             bundle_id: None,
             package_name: None,
@@ -105,6 +126,7 @@ impl Project {
             xcode_settings: Vec::new(),
             xcode_projects: Vec::new(),
             gradle_settings: Vec::new(),
+            readable_documents: Vec::new(),
             gradle_project: GradleProject::default(),
             primary_android_manifest: None,
             dependencies: Vec::new(),
@@ -143,8 +165,69 @@ impl Project {
         Ok(project)
     }
 
+    /// Keep the text of a manifest, so a rule that names one by glob finds it.
+    ///
+    /// A rule scope naming `**/Info.plist` or `**/AndroidManifest.xml` matched
+    /// nothing before this, because the audit globs `sources` and a manifest
+    /// never lands there. That is 39 rules each.
+    ///
+    /// These stay out of `sources` on purpose. The symbol scans in `derive`
+    /// read `sources`, and a string inside a plist would read there as a call
+    /// in code.
+    fn record_readable(&mut self, file: &DiscoveredFile, relative: &Path) {
+        if !matches!(
+            file.kind,
+            FileKind::InfoPlist
+                | FileKind::AndroidManifest
+                | FileKind::Entitlements
+                | FileKind::PrivacyManifest
+                | FileKind::BuildGradle
+                | FileKind::Pubspec
+                | FileKind::PackageJson
+                | FileKind::ExpoConfig
+                | FileKind::CapacitorConfig
+                | FileKind::CsProj
+        ) {
+            return;
+        }
+        if let Ok(text) = read_text(&file.path) {
+            self.readable_documents
+                .push(SourceFile::new(file.path.clone(), relative, text));
+        }
+    }
+
+    /// Read the dependency list a framework keeps outside the native project.
+    ///
+    /// Flutter resolves into a cache outside the repository, and npm resolves
+    /// into `node_modules`, which the walker excludes. In both cases the
+    /// manifest is the only record of what the app links.
+    fn ingest_framework_manifest(&mut self, file: &DiscoveredFile, relative: &Path) {
+        let text = match read_text(&file.path) {
+            Ok(text) => text,
+            Err(error) => {
+                self.warnings.push(error);
+                return;
+            }
+        };
+        match file.kind {
+            FileKind::PubspecLock => self
+                .dependencies
+                .extend(deps::parse_pubspec_lock(relative, &text)),
+            FileKind::CsProj => self
+                .dependencies
+                .extend(deps::parse_csproj(relative, &text)),
+            _ => match deps::parse_package_json(relative, &text) {
+                Ok(found) => self.dependencies.extend(found),
+                Err(error) => self.warnings.push(error.to_string()),
+            },
+        }
+    }
+
     fn ingest(&mut self, file: &DiscoveredFile) {
         let relative = file.relative.as_path();
+
+        self.record_readable(file, relative);
+
         match file.kind {
             FileKind::InfoPlist | FileKind::Entitlements | FileKind::PrivacyManifest => {
                 match read_bytes(&file.path) {
@@ -220,6 +303,16 @@ impl Project {
                     .extend(deps::parse_version_catalog(relative, &text)),
                 Err(error) => self.warnings.push(error),
             },
+            FileKind::PubspecLock | FileKind::PackageJson | FileKind::CsProj => {
+                self.ingest_framework_manifest(file, relative);
+            }
+            // Recorded so the framework detector and the rules can see that
+            // the file exists. Nothing parses them yet.
+            FileKind::Pubspec
+            | FileKind::NpmLock
+            | FileKind::NuGetLock
+            | FileKind::ExpoConfig
+            | FileKind::CapacitorConfig => {}
             FileKind::Source => match read_text(&file.path) {
                 Ok(text) => self
                     .sources

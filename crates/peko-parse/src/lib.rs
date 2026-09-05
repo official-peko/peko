@@ -10,6 +10,7 @@ pub mod bundle;
 pub mod config;
 pub mod deps;
 pub mod error;
+pub mod framework;
 pub mod gradle_project;
 pub mod kind;
 pub mod openstep;

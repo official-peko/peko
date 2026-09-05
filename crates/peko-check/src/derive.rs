@@ -154,6 +154,11 @@ pub fn derive(
     let mut found: BTreeMap<String, Value> = BTreeMap::new();
 
     found.insert("platform".to_string(), json!(project.platform.to_string()));
+    // Only when the detector placed it. Unknown stays absent, so a rule gated
+    // on the framework is undecided rather than answered wrongly.
+    if project.framework != peko_parse::framework::Framework::Unknown {
+        found.insert("framework".to_string(), json!(project.framework.as_str()));
+    }
 
     if let Some(level) = android_target_sdk(project) {
         found.insert("target_sdk_version".to_string(), json!(level));

@@ -14,6 +14,24 @@ pub enum FileKind {
     PodfileLock,
     PackageResolved,
     GradleVersionCatalog,
+    /// `pubspec.lock`, the resolved Dart package list for a Flutter project.
+    PubspecLock,
+    /// `pubspec.yaml`, which names the direct Dart dependencies.
+    Pubspec,
+    /// `package.json`, the direct npm dependencies of a React Native, Expo,
+    /// or Capacitor project.
+    PackageJson,
+    /// An npm lockfile: `package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml`.
+    NpmLock,
+    /// A .NET project file, which names its packages inline.
+    CsProj,
+    /// `packages.lock.json`, the resolved .NET package list.
+    NuGetLock,
+    /// `app.json` or `app.config.json`, where an Expo project keeps the
+    /// configuration that a native project keeps in Info.plist.
+    ExpoConfig,
+    /// `capacitor.config.json`, which holds the server url a hybrid app loads.
+    CapacitorConfig,
     Source,
     /// A privacy policy that ships in the repository.
     ///
@@ -36,6 +54,14 @@ impl FileKind {
             FileKind::PodfileLock => "podfile_lock",
             FileKind::PackageResolved => "package_resolved",
             FileKind::GradleVersionCatalog => "gradle_version_catalog",
+            FileKind::PubspecLock => "pubspec_lock",
+            FileKind::Pubspec => "pubspec",
+            FileKind::PackageJson => "package_json",
+            FileKind::NpmLock => "npm_lock",
+            FileKind::CsProj => "csproj",
+            FileKind::NuGetLock => "nuget_lock",
+            FileKind::ExpoConfig => "expo_config",
+            FileKind::CapacitorConfig => "capacitor_config",
             FileKind::Source => "source",
         }
     }
@@ -45,6 +71,9 @@ impl FileKind {
 pub const SOURCE_EXTENSIONS: &[&str] = &[
     "swift", "m", "mm", "h", "hpp", "c", "cc", "cpp", "kt", "kts", "java", "js", "jsx", "ts",
     "tsx", "dart",
+    // .NET MAUI writes its code in C# and its layout in XAML. Neither was
+    // walked, so a MAUI project was read as a repository with no source in it.
+    "cs", "xaml",
     // Two file kinds that hold policy and are not code. A StoreKit
     // configuration states the subscription period, and the store listing text
     // under fastlane holds the name, subtitle, and description that review
@@ -68,11 +97,21 @@ pub fn classify(path: &Path) -> Option<FileKind> {
         "podfile.lock" => return Some(FileKind::PodfileLock),
         "package.resolved" => return Some(FileKind::PackageResolved),
         "libs.versions.toml" => return Some(FileKind::GradleVersionCatalog),
+        "pubspec.lock" => return Some(FileKind::PubspecLock),
+        "pubspec.yaml" => return Some(FileKind::Pubspec),
+        "package.json" => return Some(FileKind::PackageJson),
+        "package-lock.json" | "yarn.lock" | "pnpm-lock.yaml" => return Some(FileKind::NpmLock),
+        "packages.lock.json" => return Some(FileKind::NuGetLock),
+        "app.json" | "app.config.json" => return Some(FileKind::ExpoConfig),
+        "capacitor.config.json" => return Some(FileKind::CapacitorConfig),
         _ => {}
     }
 
     if lower.ends_with(".entitlements") {
         return Some(FileKind::Entitlements);
+    }
+    if lower.ends_with(".csproj") {
+        return Some(FileKind::CsProj);
     }
 
     let extension = path.extension()?.to_str()?.to_ascii_lowercase();

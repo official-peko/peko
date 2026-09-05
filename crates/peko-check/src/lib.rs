@@ -5,6 +5,7 @@
 //! language model. The `peko-report` crate turns findings into a report.
 
 pub mod config;
+pub mod coverage;
 pub mod declarations;
 pub mod derive;
 pub mod discovery;

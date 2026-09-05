@@ -141,6 +141,13 @@ pub enum Ecosystem {
     #[serde(alias = "maven")]
     Gradle,
     Npm,
+    /// Dart packages, from `pubspec.lock`. Flutter resolves these into a
+    /// cache outside the project, so the lockfile is the only record.
+    #[serde(alias = "dart", alias = "pubspec")]
+    Pub,
+    /// .NET packages, from a project file or `packages.lock.json`.
+    #[serde(alias = "dotnet", alias = "nuget_package")]
+    NuGet,
 }
 
 impl Ecosystem {
@@ -150,6 +157,8 @@ impl Ecosystem {
             Ecosystem::SwiftPackage => "swift-package",
             Ecosystem::Gradle => "gradle",
             Ecosystem::Npm => "npm",
+            Ecosystem::Pub => "pub",
+            Ecosystem::NuGet => "nuget",
         }
     }
 }
