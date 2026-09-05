@@ -124,7 +124,8 @@ impl<'a> ReportBuilder<'a> {
             .collect();
         if incomplete {
             warnings.push(
-                "The interpretive rules did not run, so this report covers the                  mechanical checks only. It is not a pass."
+                "The interpretive rules did not run, so this report covers \
+                 the mechanical checks only. It is not a pass."
                     .to_string(),
             );
         }

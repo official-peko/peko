@@ -194,6 +194,15 @@ fn an_audit_whose_model_never_ran_is_not_a_pass() {
             .any(|line| line.contains("interpretive rules did not run")),
         "the report gives no reason for the failure"
     );
+    // A warning is read by a person. A multi line string literal that keeps
+    // its indentation puts a run of spaces in the middle of the sentence,
+    // which is what the first version of this shipped.
+    for line in &report.coverage.warnings {
+        assert!(
+            !line.contains("  "),
+            "a warning carries its own source indentation: {line:?}"
+        );
+    }
 }
 
 #[test]
