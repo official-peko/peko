@@ -66,6 +66,8 @@ runs:
   steps:
     - name: Install peko
       shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
         case "$(uname -s)-$(uname -m)" in
@@ -76,7 +78,7 @@ runs:
           *) echo "peko has no build for $(uname -s)-$(uname -m)" >&2; exit 1 ;;
         esac
 
-        version="${{ inputs.version }}"
+        version="$INPUT_VERSION"
         if [ "$version" = "latest" ]; then
           base="https://github.com/official-peko/peko/releases/latest/download"
         else
@@ -114,13 +116,18 @@ runs:
       shell: bash
       env:
         PEKO_API_KEY: ${{ inputs.api-key }}
+        INPUT_SARIF: ${{ inputs.sarif-file }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_ALL: ${{ inputs.all }}
+        INPUT_PLATFORM: ${{ inputs.platform }}
+        INPUT_PATH: ${{ inputs.path }}
       run: |
         set -euo pipefail
-        args=(lint --sarif "${{ inputs.sarif-file }}" --fail-on "${{ inputs.fail-on }}")
-        [ "${{ inputs.all }}" = "true" ] && args+=(--all)
-        [ -n "${{ inputs.platform }}" ] && args+=(--platform "${{ inputs.platform }}")
+        args=(lint --sarif "$INPUT_SARIF" --fail-on "$INPUT_FAIL_ON")
+        [ "$INPUT_ALL" = "true" ] && args+=(--all)
+        [ -n "$INPUT_PLATFORM" ] && args+=(--platform "$INPUT_PLATFORM")
 
-        cd "${{ inputs.path }}"
+        cd "$INPUT_PATH"
         # Keep the exit code. The upload has to happen either way, so the step
         # reports the result at the end rather than stopping here.
         set +e
@@ -128,9 +135,9 @@ runs:
         code=$?
         set -e
 
-        echo "sarif-file=${{ inputs.sarif-file }}" >> "$GITHUB_OUTPUT"
-        if [ -f "${{ inputs.sarif-file }}" ]; then
-          findings=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['runs'][0]['results']))" "${{ inputs.sarif-file }}")
+        echo "sarif-file=$INPUT_SARIF" >> "$GITHUB_OUTPUT"
+        if [ -f "$INPUT_SARIF" ]; then
+          findings=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['runs'][0]['results']))" "$INPUT_SARIF")
         else
           findings=0
         fi
@@ -153,6 +160,6 @@ runs:
         code="${{ steps.run.outputs.exit-code }}"
         echo "Peko raised ${{ steps.run.outputs.findings }} findings."
         if [ "$code" != "0" ]; then
-          echo "::error::Peko found a problem at or above ${{ inputs.fail-on }}. See the Code Scanning tab."
+          echo "::error::Peko found a problem at or above $INPUT_FAIL_ON. See the Code Scanning tab."
           exit "$code"
         fi

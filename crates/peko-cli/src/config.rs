@@ -22,7 +22,17 @@ pub struct Config {
     /// key in a committed file is a key in every fork of the repository.
     #[serde(default = "default_key_env")]
     pub api_key_env: String,
-    #[serde(default = "default_endpoint")]
+    /// Where the API lives.
+    ///
+    /// Not read from the project file, and `serde(skip)` is what enforces
+    /// that. `.pekorc.json` sits inside the repository being checked, so a
+    /// pull request could set it, and every request carries the API key and
+    /// the source. One added line would have sent both to a host the attacker
+    /// chose. A machine setting does not belong in a file that ships with
+    /// somebody else's code.
+    ///
+    /// It comes from `PEKO_API_URL`, or the default.
+    #[serde(skip, default = "default_endpoint")]
     pub api_url: String,
     /// Everything else, sent to the server untouched.
     #[serde(flatten)]
@@ -37,8 +47,15 @@ fn default_key_env() -> String {
     "PEKO_API_KEY".to_string()
 }
 
+/// The endpoint, from the environment or the built in default.
+///
+/// A person who runs their own server sets `PEKO_API_URL`. A repository
+/// cannot.
 fn default_endpoint() -> String {
-    "https://api.peko.dev/v1".to_string()
+    std::env::var("PEKO_API_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| "https://api.peko.dev/v1".to_string())
 }
 
 impl Config {
@@ -55,8 +72,13 @@ impl Config {
             });
         }
         let text = std::fs::read_to_string(&path)?;
-        serde_json::from_str(&text)
-            .map_err(|error| anyhow::anyhow!("{} does not parse: {error}", path.display()))
+        let mut config: Self = serde_json::from_str(&text)
+            .map_err(|error| anyhow::anyhow!("{} does not parse: {error}", path.display()))?;
+        // serde(skip) leaves this empty rather than running the default, so
+        // it is set here. A file that names api_url is ignored, which is the
+        // point.
+        config.api_url = default_endpoint();
+        Ok(config)
     }
 
     /// The key, read from wherever the config says it lives.
@@ -205,5 +227,43 @@ mod tests {
         std::fs::write(root.join("Pods/Info.plist"), "<plist/>").unwrap();
         let found = walk(&root, 4);
         assert!(found.is_empty(), "{found:?}");
+    }
+}
+
+#[cfg(test)]
+mod endpoint_tests {
+    use super::*;
+
+    #[test]
+    fn a_project_file_cannot_set_the_endpoint() {
+        // The attack this stops. .pekorc.json sits inside the repository being
+        // checked, so a pull request can write anything into it. Every request
+        // carries the API key and the source, so one added line would have
+        // sent both to a host the attacker chose.
+        let text = r#"{
+            "version": 1,
+            "platform": "ios",
+            "api_url": "https://evil.example/v1"
+        }"#;
+        let config: Config = serde_json::from_str(text).expect("the file parses");
+        assert_ne!(
+            config.api_url, "https://evil.example/v1",
+            "a repository set the endpoint the api key is sent to"
+        );
+    }
+
+    #[test]
+    fn the_endpoint_comes_from_the_environment_or_the_default() {
+        // A person running their own server sets a variable. A repository
+        // cannot set a variable.
+        std::env::remove_var("PEKO_API_URL");
+        assert_eq!(default_endpoint(), "https://api.peko.dev/v1");
+    }
+
+    #[test]
+    fn an_empty_variable_falls_back_rather_than_sending_nowhere() {
+        std::env::set_var("PEKO_API_URL", "   ");
+        assert_eq!(default_endpoint(), "https://api.peko.dev/v1");
+        std::env::remove_var("PEKO_API_URL");
     }
 }

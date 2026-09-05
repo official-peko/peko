@@ -17,6 +17,13 @@ use support::{lint_answer, project, Server};
 /// `.pekorc.json` names the variable and never holds the key, so a test has
 /// to set it. Each project uses its own variable name, because an environment
 /// variable is global to the process and these tests run beside each other.
+/// Set the key and the endpoint for one call, and put them back afterwards.
+///
+/// Both are process wide. The endpoint moved out of the project file because a
+/// repository that names it names where the api key is sent, so a test points
+/// the process at its own server rather than writing a url into a file. Tests
+/// run in parallel and each has its own port, so the lock is what keeps one
+/// from answering another's server.
 fn with_key<T>(name: &str, body: impl FnOnce() -> T) -> T {
     std::env::set_var(support::key_var(name), "peko_testkey");
     body()
@@ -37,7 +44,7 @@ fn files() -> Vec<(&'static str, &'static str)> {
 #[test]
 fn lint_sends_the_files_and_fails_on_an_error_finding() {
     let server = Server::start(vec![(200, lint_answer())]);
-    let root = project("lint", &server.url(), &files());
+    let (root, _endpoint) = project("lint", &server.url(), &files());
     let key = "lint";
 
     let code = with_key(key, || {
@@ -86,7 +93,7 @@ fn lint_passes_when_nothing_is_wrong() {
     })
     .to_string();
     let server = Server::start(vec![(200, clean)]);
-    let root = project("lint-clean", &server.url(), &files());
+    let (root, _endpoint) = project("lint-clean", &server.url(), &files());
     let key = "lint-clean";
 
     let code = with_key(key, || {
@@ -120,28 +127,32 @@ fn lint_fails_on_an_unanswered_fact_unless_told_otherwise() {
     })
     .to_string();
 
-    let server = Server::start(vec![(200, quiet.clone())]);
-    let root = project("lint-undecided", &server.url(), &files());
-    let key = "lint-undecided";
-    let strict = with_key(key, || {
-        peko_cli::lint(
-            &root,
-            &peko_cli::LintOptions {
-                all: true,
-                since: "HEAD",
-                platform: None,
-                json: false,
-                sarif: None,
-                fail_on: "error",
-                allow_undecided: false,
-            },
-        )
-        .expect("runs")
-    });
+    // The two halves are scoped, because the guard project() returns is not
+    // reentrant and the second call would wait on the first.
+    let strict = {
+        let server = Server::start(vec![(200, quiet.clone())]);
+        let (root, _endpoint) = project("lint-undecided", &server.url(), &files());
+        let key = "lint-undecided";
+        with_key(key, || {
+            peko_cli::lint(
+                &root,
+                &peko_cli::LintOptions {
+                    all: true,
+                    since: "HEAD",
+                    platform: None,
+                    json: false,
+                    sarif: None,
+                    fail_on: "error",
+                    allow_undecided: false,
+                },
+            )
+            .expect("runs")
+        })
+    };
     assert_eq!(strict, 1, "an unanswered fact must fail by default");
 
     let server = Server::start(vec![(200, quiet)]);
-    let root = project("lint-allowed", &server.url(), &files());
+    let (root, _endpoint) = project("lint-allowed", &server.url(), &files());
     let key = "lint-allowed";
     let relaxed = with_key(key, || {
         peko_cli::lint(
@@ -168,7 +179,7 @@ fn lint_turns_a_server_error_into_the_message_a_person_reads() {
     })
     .to_string();
     let server = Server::start(vec![(429, refusal)]);
-    let root = project("lint-refused", &server.url(), &files());
+    let (root, _endpoint) = project("lint-refused", &server.url(), &files());
     let key = "lint-refused";
 
     let error = with_key(key, || {
@@ -204,7 +215,7 @@ fn lint_without_a_key_runs_here_and_sends_nothing() {
     // no server at all, or a project sits on somebody's disk one moment and on
     // a network the next.
     let server = Server::start(vec![(200, lint_answer())]);
-    let root = project("lint-nokey", &server.url(), &files());
+    let (root, _endpoint) = project("lint-nokey", &server.url(), &files());
     std::env::remove_var(support::key_var("lint-nokey"));
 
     let code = peko_cli::lint(
@@ -268,7 +279,7 @@ fn estimate_answer(cost: f64, blockers: &serde_json::Value) -> String {
 fn audit_without_yes_prints_the_price_and_spends_nothing() {
     // Nobody finds out what the expensive tier costs by being charged for it.
     let server = Server::start(vec![(200, estimate_answer(0.42, &serde_json::json!([])))]);
-    let root = project("audit-quote", &server.url(), &files());
+    let (root, _endpoint) = project("audit-quote", &server.url(), &files());
     let key = "audit-quote";
 
     let code = with_key(key, || {
@@ -293,7 +304,7 @@ fn audit_without_yes_fails_when_something_blocks_it() {
                             "message": "The free checks report 2 errors."}]),
     );
     let server = Server::start(vec![(200, blocked)]);
-    let root = project("audit-blocked", &server.url(), &files());
+    let (root, _endpoint) = project("audit-blocked", &server.url(), &files());
     let key = "audit-blocked";
 
     let code = with_key(key, || {
@@ -306,7 +317,7 @@ fn audit_without_yes_fails_when_something_blocks_it() {
 fn audit_with_yes_and_no_limit_refuses_before_it_sends_anything() {
     // A run with no cap has no answer to how much it cost.
     let server = Server::start(vec![(200, estimate_answer(0.42, &serde_json::json!([])))]);
-    let root = project("audit-nolimit", &server.url(), &files());
+    let (root, _endpoint) = project("audit-nolimit", &server.url(), &files());
     let key = "audit-nolimit";
 
     let error = with_key(key, || {
@@ -319,7 +330,7 @@ fn audit_with_yes_and_no_limit_refuses_before_it_sends_anything() {
 #[test]
 fn audit_refuses_a_limit_under_the_estimate_without_starting_a_job() {
     let server = Server::start(vec![(200, estimate_answer(2.00, &serde_json::json!([])))]);
-    let root = project("audit-cheap", &server.url(), &files());
+    let (root, _endpoint) = project("audit-cheap", &server.url(), &files());
     let key = "audit-cheap";
 
     let error = with_key(key, || {
@@ -360,7 +371,7 @@ fn audit_starts_a_job_and_polls_until_it_finishes() {
         (200, running),
         (200, done),
     ]);
-    let root = project("audit-job", &server.url(), &files());
+    let (root, _endpoint) = project("audit-job", &server.url(), &files());
     let key = "audit-job";
 
     let code = with_key(key, || {
@@ -401,7 +412,7 @@ fn audit_reports_a_failed_job_as_an_error_and_not_a_pass() {
         (200, started),
         (200, failed),
     ]);
-    let root = project("audit-failed", &server.url(), &files());
+    let (root, _endpoint) = project("audit-failed", &server.url(), &files());
     let key = "audit-failed";
 
     let error = with_key(key, || {
@@ -426,7 +437,7 @@ fn facts_writes_what_the_code_answered_and_leaves_the_rest_null() {
     })
     .to_string();
     let server = Server::start(vec![(200, answer)]);
-    let root = project("facts", &server.url(), &files());
+    let (root, _endpoint) = project("facts", &server.url(), &files());
     let key = "facts";
 
     let code = with_key(key, || peko_cli::facts(&root, true).expect("runs"));
@@ -451,7 +462,7 @@ fn facts_without_write_changes_nothing_on_disk() {
     })
     .to_string();
     let server = Server::start(vec![(200, answer)]);
-    let root = project("facts-dry", &server.url(), &files());
+    let (root, _endpoint) = project("facts-dry", &server.url(), &files());
     let key = "facts-dry";
     let before = std::fs::read_to_string(root.join(".pekorc.json")).expect("read");
 
@@ -473,7 +484,7 @@ fn an_override_on_a_rule_that_cannot_be_overridden_is_refused() {
     })
     .to_string();
     let server = Server::start(vec![(200, answer)]);
-    let root = project("override-refused", &server.url(), &files());
+    let (root, _endpoint) = project("override-refused", &server.url(), &files());
     let key = "override-refused";
 
     let error = with_key(key, || {
@@ -503,7 +514,7 @@ fn an_override_on_a_rule_that_permits_one_is_written_with_its_reason() {
     })
     .to_string();
     let server = Server::start(vec![(200, answer)]);
-    let root = project("override-ok", &server.url(), &files());
+    let (root, _endpoint) = project("override-ok", &server.url(), &files());
     let key = "override-ok";
 
     let code = with_key(key, || {
@@ -530,7 +541,7 @@ fn status_reports_what_the_server_says_about_itself() {
     })
     .to_string();
     let server = Server::start(vec![(200, health)]);
-    let root = project("status", &server.url(), &files());
+    let (root, _endpoint) = project("status", &server.url(), &files());
     let key = "status";
 
     let code = with_key(key, || peko_cli::status(&root).expect("runs"));
@@ -578,7 +589,7 @@ fn lint_runs_locally_when_there_is_no_key() {
     //
     // The server address here points at a port that answers nothing. If the
     // run reaches the network at all, it fails rather than passes quietly.
-    let root = support::project(
+    let (root, _endpoint) = support::project(
         "localnokey",
         "http://127.0.0.1:1/v1",
         &[
@@ -622,7 +633,7 @@ fn lint_runs_locally_when_there_is_no_key() {
 #[test]
 fn the_local_run_names_the_database_it_used() {
     // A finding nobody can trace to a database version cannot be reproduced.
-    let root = support::project(
+    let (root, _endpoint) = support::project(
         "localversion",
         "http://127.0.0.1:1/v1",
         &[(

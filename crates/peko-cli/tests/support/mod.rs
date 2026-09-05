@@ -140,12 +140,24 @@ pub fn key_var(name: &str) -> String {
 }
 
 /// Write a project whose `.pekorc.json` points at the server.
-pub fn project(name: &str, url: &str, files: &[(&str, &str)]) -> std::path::PathBuf {
+/// Returns the project root and a guard.
+///
+/// Hold the guard for the whole test. The endpoint is a process wide variable
+/// now, and without the guard a test that starts while this one is running
+/// points this one at the other one's server.
+pub fn project(
+    name: &str,
+    url: &str,
+    files: &[(&str, &str)],
+) -> (std::path::PathBuf, std::sync::MutexGuard<'static, ()>) {
     let root = std::env::temp_dir().join(format!(
         "peko-cli-{name}-{}-{:?}",
         std::process::id(),
         std::thread::current().id()
     ));
+    let guard = ENDPOINT_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(&root).expect("make the project");
     for (path, body) in files {
@@ -154,16 +166,30 @@ pub fn project(name: &str, url: &str, files: &[(&str, &str)]) -> std::path::Path
         std::fs::write(&target, body).expect("write the file");
     }
     write_config_named(&root, url, &key_var(name));
-    root
+    // The endpoint is process wide, because a project file that names it names
+    // where the api key is sent. with_key takes the lock that keeps two tests
+    // from answering each other's server.
+    std::env::set_var("PEKO_API_URL", url);
+    (root, guard)
 }
 
+/// Point the process at a server, for the length of one test.
+///
+/// The endpoint is a process wide variable now, not a field in the project
+/// file, because a project file travels with somebody else's repository and
+/// every request carries the api key. Tests each run their own server on a
+/// random port, so they take this lock rather than overwrite each other.
+pub static ENDPOINT_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 /// Write a `.pekorc.json` naming a particular key variable.
-pub fn write_config_named(root: &std::path::Path, url: &str, key_env: &str) {
+///
+/// The url is not written into the file. It cannot be: a repository that
+/// names the endpoint names where the api key is sent.
+pub fn write_config_named(root: &std::path::Path, _url: &str, key_env: &str) {
     let config = serde_json::json!({
         "version": 1,
         "platform": "ios",
         "api_key_env": key_env,
-        "api_url": url,
         "facts": {},
         "overrides": [],
     });
