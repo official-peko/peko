@@ -155,3 +155,56 @@ fn an_overridden_finding_does_not_fail_the_run() {
     assert!(finding.overridden);
     assert!(finding.override_reason.is_some());
 }
+
+/// Build an audit tier report, saying whether the model ran.
+fn audit_report(fixture: &str, platform: Platform, interpretive_ran: bool) -> Report {
+    let database = RuleDatabase::load_from_dir(root().join("rules")).unwrap();
+    let config = PekoConfig::new(platform);
+    let project = Project::load(&root().join("fixtures").join(fixture), &config).unwrap();
+    let rules = database.active_rules(platform);
+    let outcome = engine::run(&project, &rules, &config, None).unwrap();
+    ReportBuilder::new(&database, Tier::Audit)
+        .severity_threshold(config.severity_threshold)
+        .interpretive_performed(interpretive_ran)
+        .build_with_audit(&project, &outcome, &[])
+}
+
+#[test]
+fn an_audit_whose_model_never_ran_is_not_a_pass() {
+    // This is what a deployed run produced: every model call returned 400,
+    // all 52 interpretive rules failed, the mechanical checks found nothing,
+    // and the report came back clean. A developer reads that as "my app is
+    // fine". The truth was "most of it was never read".
+    let report = audit_report("ios-compliant", Platform::Ios, false);
+    assert_eq!(report.summary.total_findings, 0, "nothing was found");
+    assert!(
+        !report.summary.pass,
+        "an audit that did not run its interpretive half reported a pass"
+    );
+    assert_ne!(report.exit_code(), 0, "a gate reading this would let it through");
+    assert!(
+        report
+            .coverage
+            .warnings
+            .iter()
+            .any(|line| line.contains("interpretive rules did not run")),
+        "the report gives no reason for the failure"
+    );
+}
+
+#[test]
+fn an_audit_that_did_run_and_found_nothing_still_passes() {
+    // The guard must not turn every clean audit into a failure.
+    let report = audit_report("ios-compliant", Platform::Ios, true);
+    assert!(report.summary.pass);
+    assert_eq!(report.exit_code(), 0);
+    assert!(report.coverage.interpretive_analysis_performed);
+}
+
+#[test]
+fn a_lint_is_unaffected_by_the_audit_guard() {
+    // A lint never runs interpretive rules, and it must still pass clean.
+    let report = report("ios-compliant", Platform::Ios);
+    assert!(!report.coverage.interpretive_analysis_performed);
+    assert!(report.summary.pass);
+}

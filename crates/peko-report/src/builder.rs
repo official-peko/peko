@@ -105,6 +105,30 @@ impl<'a> ReportBuilder<'a> {
             }
         }
 
+        // An audit whose interpretive half never ran did not check what it
+        // was asked to check. Reporting a pass for it is the worst answer
+        // this tool can give: a developer reads "pass" as "my app is fine"
+        // when the truth is "most of it was never read".
+        //
+        // This happened against the deployed service. Every model call
+        // returned 400, all 52 rules failed, and the report came back clean
+        // with no findings. A gate that reads `pass` must fail here.
+        let incomplete = self.tier == Tier::Audit && !self.interpretive_performed;
+        let pass = pass && !incomplete;
+
+        let mut warnings: Vec<String> = project
+            .warnings
+            .iter()
+            .chain(outcome.warnings.iter())
+            .cloned()
+            .collect();
+        if incomplete {
+            warnings.push(
+                "The interpretive rules did not run, so this report covers the                  mechanical checks only. It is not a pass."
+                    .to_string(),
+            );
+        }
+
         Report {
             report_id: Uuid::new_v4(),
             timestamp: Utc::now(),
@@ -141,12 +165,7 @@ impl<'a> ReportBuilder<'a> {
                 transitive_dependencies_checked: false,
                 files_analyzed: project.file_count(),
                 assumed_facts: outcome.assumed_facts.clone(),
-                warnings: project
-                    .warnings
-                    .iter()
-                    .chain(outcome.warnings.iter())
-                    .cloned()
-                    .collect(),
+                warnings,
             },
             data_handling: DataHandling::default(),
         }
