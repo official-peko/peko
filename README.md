@@ -6,12 +6,54 @@ policies, and reports what a reviewer is likely to refuse.
 This repository holds the part you run. It reads files on your machine, calls
 no model, and needs no account.
 
+## Install
+
+Pick the file for your machine.
+
+| Machine | File |
+|---|---|
+| macOS, Apple silicon | `peko-aarch64-apple-darwin` |
+| macOS, Intel | `peko-x86_64-apple-darwin` |
+| Linux, x86_64 | `peko-x86_64-unknown-linux-gnu` |
+| Linux, arm64 | `peko-aarch64-unknown-linux-gnu` |
+| Windows | `peko-x86_64-pc-windows-msvc.exe` |
+
+Download it under its own name, check it against the checksum beside it, then
+rename it and put it on your path.
+
 ```bash
+name=peko-aarch64-apple-darwin
+base=https://github.com/official-peko/peko/releases/latest/download
+
+curl -fsSLO "$base/$name"
+curl -fsSLO "$base/$name.sha256"
+shasum -a 256 -c "$name.sha256"
+
+chmod +x "$name"
+sudo mv "$name" /usr/local/bin/peko
+```
+
+The checksum file names the file it belongs to, so keep the downloaded name
+until the check passes. On Linux use `sha256sum -c` in place of `shasum -a
+256 -c`.
+
+If you download through a browser rather than with `curl`, macOS marks the
+file and refuses to run it. Clear the mark first.
+
+```bash
+xattr -d com.apple.quarantine peko
+```
+
+## Run it
+
+```bash
+cd your-project
 peko init
 peko lint --all
 ```
 
-The first run works offline. The rule database ships inside the binary.
+The first run works offline. The rule database ships inside the binary, and
+nothing leaves your machine.
 
 ## In a pull request
 
@@ -27,7 +69,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: official-peko/peko@v1
         with:
-          version: v1.0.0
+          version: v1.3.0
 ```
 
 Every finding lands on the line it belongs to, in the diff, through GitHub

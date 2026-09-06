@@ -18,9 +18,9 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"
-peko-check = { version = "0.1.0", path = "../peko-check" }
-peko-report = { version = "0.1.0", path = "../peko-report" }
-peko-rules = { version = "0.1.0", path = "../peko-rules" }
+peko-check = { version = "1.3.0", path = "../peko-check" }
+peko-report = { version = "1.3.0", path = "../peko-report" }
+peko-rules = { version = "1.3.0", path = "../peko-rules" }
 base64 = "0.22"
 clap = { version = "4.6.6", features = ["derive"] }
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }

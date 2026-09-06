@@ -40,6 +40,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Every release up to v1.2.1 shipped a binary that answered `peko 0.1.0`,
+      # because the workspace version never moved with the tag. A person could
+      # not tell which build they were running.
+      - name: The tag matches the version in Cargo.toml
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          crate=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          echo "tag $tag, Cargo.toml $crate"
+          if [ "$tag" != "v$crate" ]; then
+            echo "the tag and Cargo.toml disagree. Bump one to match the other." >&2
+            exit 1
+          fi
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}

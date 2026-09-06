@@ -51,11 +51,16 @@ fn default_key_env() -> String {
 ///
 /// A person who runs their own server sets `PEKO_API_URL`. A repository
 /// cannot.
+///
+/// Every released binary carries this address, so it can only change with a
+/// new release, and an old binary keeps the old one. It pointed at
+/// api.peko.dev for every release up to v1.2.1. That domain is not ours, so
+/// login, audit, and facts failed for everybody who installed one.
 fn default_endpoint() -> String {
     std::env::var("PEKO_API_URL")
         .ok()
         .filter(|value| !value.trim().is_empty())
-        .unwrap_or_else(|| "https://api.peko.dev/v1".to_string())
+        .unwrap_or_else(|| "https://api.peko.so/v1".to_string())
 }
 
 impl Config {
@@ -257,13 +262,13 @@ mod endpoint_tests {
         // A person running their own server sets a variable. A repository
         // cannot set a variable.
         std::env::remove_var("PEKO_API_URL");
-        assert_eq!(default_endpoint(), "https://api.peko.dev/v1");
+        assert_eq!(default_endpoint(), "https://api.peko.so/v1");
     }
 
     #[test]
     fn an_empty_variable_falls_back_rather_than_sending_nowhere() {
         std::env::set_var("PEKO_API_URL", "   ");
-        assert_eq!(default_endpoint(), "https://api.peko.dev/v1");
+        assert_eq!(default_endpoint(), "https://api.peko.so/v1");
         std::env::remove_var("PEKO_API_URL");
     }
 }
