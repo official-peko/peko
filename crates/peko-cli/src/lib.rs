@@ -39,6 +39,56 @@ pub fn describe(status: reqwest::StatusCode, body: &str) -> anyhow::Error {
     anyhow::anyhow!("the server answered {status}")
 }
 
+/// Print a limit that money or time removes, rather than raise an error.
+///
+/// A 402 is not a failure. Nothing broke, nothing is wrong with the project,
+/// and there is nothing to debug. Printing it as `Error:` next to a stack of
+/// real errors tells somebody to go looking for a fault that is not there.
+///
+/// Returns true when the answer was one of those, so the caller stops without
+/// raising. Exit code 0, because the command did what it was asked to do:
+/// find out whether an audit could run.
+pub fn print_limit(status: reqwest::StatusCode, body: &str) -> bool {
+    if status != reqwest::StatusCode::PAYMENT_REQUIRED {
+        return false;
+    }
+    let value: serde_json::Value = serde_json::from_str(body).unwrap_or_default();
+    let message = value["error"]["message"]
+        .as_str()
+        .unwrap_or("This plan does not include an audit.");
+
+    eprintln!();
+    eprintln!("The audit tier is not open on this account.");
+    eprintln!();
+    for line in wrap(message, 72) {
+        eprintln!("  {line}");
+    }
+    eprintln!();
+    eprintln!("  The mechanical lint is unaffected. `peko lint --all` still runs");
+    eprintln!("  here, offline, and needs no account.");
+    eprintln!();
+    true
+}
+
+/// Break a paragraph at a width, on spaces.
+fn wrap(text: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in text.split_whitespace() {
+        if !line.is_empty() && line.len() + 1 + word.len() > width {
+            lines.push(std::mem::take(&mut line));
+        }
+        if !line.is_empty() {
+            line.push(' ');
+        }
+        line.push_str(word);
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
 /// What one lint run was asked for.
 ///
 /// These arrived as eight positional arguments, and a caller that swapped two
@@ -275,6 +325,10 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
         let status = response.status();
         let text = response.text().unwrap_or_default();
         if !status.is_success() {
+            // A tier that does not include this is not a fault to report.
+            if print_limit(status, &text) {
+                return Ok(0);
+            }
             return Err(describe(status, &text));
         }
         serde_json::from_str(&text)?
@@ -328,6 +382,11 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
     let status = response.status();
     let text = response.text().unwrap_or_default();
     if !status.is_success() {
+        // The month can run out between the estimate and the start, so this
+        // path meets the same wall the estimate does.
+        if print_limit(status, &text) {
+            return Ok(0);
+        }
         return Err(describe(status, &text));
     }
     let started: serde_json::Value = serde_json::from_str(&text)?;
@@ -635,4 +694,43 @@ pub fn login(root: &Path) -> Result<i32> {
         println!("{} is set here already.", config.api_key_env);
     }
     Ok(0)
+}
+
+#[cfg(test)]
+mod limit_tests {
+    use super::print_limit;
+    use reqwest::StatusCode;
+
+    const BODY: &str = r#"{"error":{"code":"tier_has_no_audits","message":"The free plan runs the mechanical lint, which needs no account and no server. Pro is $20 a month and includes 25 of them. See https://peko.so/pricing."}}"#;
+
+    /// A paywall is not a fault. Printing it as an error next to real ones
+    /// sends somebody looking for a break in their project that is not there.
+    #[test]
+    fn a_payment_required_answer_is_handled_rather_than_raised() {
+        assert!(print_limit(StatusCode::PAYMENT_REQUIRED, BODY));
+    }
+
+    /// Everything else still raises. A 500 that printed a friendly note and
+    /// exited 0 would hide a broken server behind a sales message.
+    #[test]
+    fn every_other_failure_is_left_to_the_caller() {
+        for status in [
+            StatusCode::UNAUTHORIZED,
+            StatusCode::FORBIDDEN,
+            StatusCode::TOO_MANY_REQUESTS,
+            StatusCode::INTERNAL_SERVER_ERROR,
+            StatusCode::BAD_GATEWAY,
+        ] {
+            assert!(
+                !print_limit(status, BODY),
+                "{status} must still be raised as an error"
+            );
+        }
+    }
+
+    /// A 402 with a body that will not parse still says something useful.
+    #[test]
+    fn a_limit_with_no_message_still_prints() {
+        assert!(print_limit(StatusCode::PAYMENT_REQUIRED, "not json at all"));
+    }
 }
