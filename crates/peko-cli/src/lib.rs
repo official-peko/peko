@@ -529,8 +529,35 @@ pub fn facts(root: &Path, write: bool) -> Result<i32> {
     let questions = answer["questions"].as_array().cloned().unwrap_or_default();
     println!("The code answered {inferred} facts.");
 
+    // Before anything about what is missing. A value nobody reads is worse
+    // than a blank: a blank is reported as a question, and this reads as an
+    // answer while switching nothing on. Somebody who wrote `GB` and sees
+    // "nothing is left to answer" has no reason to look again.
+    let unread_count = answer["unread"].as_array().map_or(0, Vec::len);
+    if let Some(unread) = answer["unread"].as_array().filter(|list| !list.is_empty()) {
+        println!("\nSome answers match nothing, so they switch no rule on:\n");
+        for entry in unread {
+            let fact = entry["fact"].as_str().unwrap_or("");
+            let value = entry["value"].as_str().unwrap_or("");
+            let understood: Vec<&str> = entry["understood"]
+                .as_array()
+                .map(|list| list.iter().filter_map(|v| v.as_str()).collect())
+                .unwrap_or_default();
+            println!("  {fact} holds {value:?}, which no rule reads.");
+            if !understood.is_empty() {
+                println!("    The values that do: {}", understood.join(", "));
+            }
+        }
+    }
+
     if questions.is_empty() {
-        println!("Nothing is left to answer. Run `peko lint`.");
+        // "Nothing is left to answer" beside a value that reads as an answer
+        // and switches nothing on is the contradiction that hid the last one.
+        if unread_count > 0 {
+            println!("\nEvery fact has an answer. Fix the ones above and run `peko lint`.");
+        } else {
+            println!("Nothing is left to answer. Run `peko lint`.");
+        }
         return Ok(0);
     }
 
