@@ -77,14 +77,24 @@ jobs:
             exit 1
           fi
 
-          # Every finding has to say where it is, or nobody can act on it.
+          # A finding has to name its rule, or nobody can look it up.
+          #
+          # Most name a file too, and a run where none of them does is an
+          # engine that read nothing. But not every finding can: "this project
+          # has no privacy manifest" is about a file that does not exist, and
+          # pointing at one that does would be a lie for the sake of a line
+          # number. Those are counted and named rather than demanded.
           python3 - <<'PY'
           import json, os
           results = json.load(open(os.environ["SARIF"]))["runs"][0]["results"]
+          placed, unplaced = [], []
           for result in results:
               rule = result.get("ruleId", "")
               assert rule, "a finding with no rule id"
-              locations = result.get("locations") or []
-              assert locations, f"{rule} names no file"
-          print(f"every one of {len(results)} findings names a rule and a file")
+              (placed if result.get("locations") else unplaced).append(rule)
+
+          assert placed, "no finding named a file, so nothing was really read"
+          print(f"{len(placed)} of {len(results)} findings name a file")
+          if unplaced:
+              print("about something absent, so no file to name: " + ", ".join(unplaced))
           PY
