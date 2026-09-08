@@ -314,17 +314,54 @@ fn audit_without_yes_fails_when_something_blocks_it() {
 }
 
 #[test]
-fn audit_with_yes_and_no_limit_refuses_before_it_sends_anything() {
-    // A run with no cap has no answer to how much it cost.
-    let server = Server::start(vec![(200, estimate_answer(0.42, &serde_json::json!([])))]);
+fn audit_with_yes_and_no_limit_runs_and_leaves_the_cap_to_the_plan() {
+    // The cap used to be required with --yes, from when a customer paid per
+    // run. Under a subscription the dollars are what the model costs the
+    // server: the person asking neither pays them nor can change them.
+    //
+    // Absent has to reach the server as an absent field rather than a huge
+    // number, because the server refuses a cap above the plan's rather than
+    // clamping it. A huge number would be refused.
+    let started = serde_json::json!({
+        "job_id": "22222222-2222-2222-2222-222222222222",
+        "state": "running", "rules_total": 1,
+        "estimated_cost_usd": 0.42, "requests_remaining_today": 4,
+        "poll": "/v1/audit/22222222-2222-2222-2222-222222222222"
+    })
+    .to_string();
+    let done = serde_json::json!({
+        "job_id": "22222222-2222-2222-2222-222222222222",
+        "state": "done", "rules_total": 1, "rules_done": 1,
+        "spent_usd": 0.42, "report_available_for_minutes": 60,
+        "report": {"tier": "audit", "findings": [],
+                   "summary": {"by_severity": {"error": 0, "warning": 0, "info": 0}}}
+    })
+    .to_string();
+
+    let server = Server::start(vec![
+        (200, estimate_answer(0.42, &serde_json::json!([]))),
+        (200, started),
+        (200, done),
+    ]);
     let (root, _endpoint) = project("audit-nolimit", &server.url(), &files());
     let key = "audit-nolimit";
 
-    let error = with_key(key, || {
-        peko_cli::audit(&root, true, None, false).expect_err("must refuse")
+    let code = with_key(key, || {
+        peko_cli::audit(&root, true, None, false).expect("runs")
     });
-    assert!(error.to_string().contains("--max-spend"), "{error}");
-    assert_eq!(server.hits(), 1, "only the estimate may have been called");
+    assert_eq!(code, 0, "a clean report must pass");
+
+    let seen = server.requests();
+    let start = seen
+        .iter()
+        .find(|request| request.method == "POST" && request.path.ends_with("/audit"))
+        .expect("the job must have been started");
+    let body: serde_json::Value = serde_json::from_str(&start.body).expect("the body is JSON");
+    assert!(
+        body["max_spend_usd"].is_null(),
+        "a cap the caller never named must not be invented: {}",
+        start.body
+    );
 }
 
 #[test]

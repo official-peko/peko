@@ -340,21 +340,55 @@ mod unanswered_tests {
 /// The price comes before the blockers. A reader who sees a wall of problems
 /// first never gets to the number they asked for.
 pub fn estimate(body: &Value) -> String {
+    estimate_styled(body, crate::style::Style::detect())
+}
+
+/// What a run would read, and what it costs the person asking.
+///
+/// The cost is an audit out of the month's allowance, not a sum of money. The
+/// dollars in the estimate are what the model costs the server, and a
+/// subscriber neither pays them nor can change them. Leading with a price
+/// invited the reasonable question of whether they were about to be charged
+/// it, and the answer is no.
+pub fn estimate_styled(body: &Value, style: crate::style::Style) -> String {
     use std::fmt::Write as _;
     let mut out = String::new();
-    let _ = writeln!(out, "{}", body["summary"].as_str().unwrap_or("no estimate"));
+
+    let allowance = &body["allowance"];
+    let included = allowance["audits_included"].as_u64().unwrap_or(0);
+    if included > 0 {
+        let used = allowance["audits_used"].as_u64().unwrap_or(0);
+        let left = included.saturating_sub(used);
+        let _ = writeln!(
+            out,
+            "This run uses one audit. {} of {included} left this month.",
+            style.bold(&left.to_string())
+        );
+        if let Some(resets) = allowance["resets_on"].as_str().filter(|s| !s.is_empty()) {
+            let _ = writeln!(out, "{}", style.dim(&format!("The count resets on {resets}.")));
+        }
+        let _ = writeln!(out);
+    }
+
+    let _ = writeln!(
+        out,
+        "{}",
+        style.dim(body["summary"].as_str().unwrap_or("no estimate"))
+    );
 
     let rules = body["rules"].as_array().cloned().unwrap_or_default();
     if !rules.is_empty() {
         let _ = writeln!(out);
         let _ = writeln!(out, "What it would read:");
         for rule in rules.iter().take(10) {
+            // Files rather than fractions of a cent. What a rule reads is the
+            // thing somebody can act on by narrowing the project.
+            let files = rule["files"].as_array().map_or(0, Vec::len);
+            let plural = if files == 1 { "file" } else { "files" };
             let _ = writeln!(
                 out,
-                "  {} {:>7}  {} files",
-                rule["rule_id"].as_str().unwrap_or(""),
-                format!("${:.3}", rule["estimated_cost_usd"].as_f64().unwrap_or(0.0)),
-                rule["files"].as_array().map_or(0, Vec::len)
+                "  {}  {files} {plural}",
+                style.dim(rule["rule_id"].as_str().unwrap_or(""))
             );
         }
         if rules.len() > 10 {
@@ -393,7 +427,7 @@ mod estimate_tests {
             "cached": [],
             "blockers": [{"reason": "lint_failing", "message": "The free checks report 2 errors."}],
         });
-        let text = estimate(&body);
+        let text = estimate_styled(&body, crate::style::Style::plain());
         let price = text.find("$0.42").expect("the price is printed");
         let problem = text.find("free checks").expect("the blocker is printed");
         assert!(
@@ -410,7 +444,7 @@ mod estimate_tests {
             "cached": [],
             "blockers": [],
         });
-        let text = estimate(&body);
+        let text = estimate_styled(&body, crate::style::Style::plain());
         assert!(text.contains("AAPL-PRIV-001"));
         assert!(!text.contains("will not run"));
     }
@@ -420,15 +454,18 @@ mod estimate_tests {
         let rules: Vec<_> = (0..25)
             .map(|index| json!({"rule_id": format!("R-{index}"), "estimated_cost_usd": 0.01, "files": []}))
             .collect();
-        let text = estimate(&json!({"summary": "s", "rules": rules, "cached": [], "blockers": []}));
+        let text = estimate_styled(
+            &json!({"summary": "s", "rules": rules, "cached": [], "blockers": []}),
+            crate::style::Style::plain(),
+        );
         assert!(text.contains("and 15 more rules"), "{text}");
     }
 
     #[test]
     fn what_the_cache_already_holds_is_named() {
-        let text = estimate(&json!({
+        let text = estimate_styled(&json!({
             "summary": "s", "rules": [], "cached": ["A", "B"], "blockers": []
-        }));
+        }), crate::style::Style::plain());
         assert!(text.contains("2 rules are answered already"), "{text}");
     }
 }
@@ -523,5 +560,55 @@ mod colour_tests {
             }
         }
         out
+    }
+}
+
+#[cfg(test)]
+mod allowance_tests {
+    use super::estimate_styled;
+    use crate::style::Style;
+    use serde_json::json;
+
+    fn body() -> serde_json::Value {
+        json!({
+            "summary": "12 rules would read your code, about $1.20 with the model",
+            "rules": [{"rule_id": "app-store-5.1.1", "files": ["a", "b"]}],
+            "cached": [],
+            "allowance": {"audits_used": 6, "audits_included": 25, "resets_on": "2026-10-01"},
+        })
+    }
+
+    /// The first line answers the question somebody actually has, which is
+    /// what this run costs them. A subscriber pays no dollars per run.
+    #[test]
+    fn the_count_comes_before_the_dollars() {
+        let out = estimate_styled(&body(), Style::plain());
+        let counts = out.find("19 of 25").expect("the audits left are named");
+        let dollars = out.find("$1.20").expect("the model cost is still shown");
+        assert!(
+            counts < dollars,
+            "the price led the estimate and read as a charge:\n{out}"
+        );
+        assert!(out.contains("uses one audit"));
+        assert!(out.contains("resets on 2026-10-01"));
+    }
+
+    /// A per-rule dollar figure is a fraction of a cent nobody can act on.
+    /// What a rule reads is the thing narrowing the project changes.
+    #[test]
+    fn a_rule_line_names_files_rather_than_cents() {
+        let out = estimate_styled(&body(), Style::plain());
+        assert!(out.contains("app-store-5.1.1  2 files"), "{out}");
+    }
+
+    /// A server too old to send the allowance, or one with no database,
+    /// still has to print something.
+    #[test]
+    fn a_missing_allowance_drops_the_line_rather_than_showing_zero() {
+        let mut body = body();
+        body["allowance"] = json!(null);
+        let out = estimate_styled(&body, Style::plain());
+        assert!(!out.contains("of 0"), "{out}");
+        assert!(out.contains("12 rules would read your code"));
     }
 }

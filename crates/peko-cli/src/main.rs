@@ -69,7 +69,8 @@ enum Command {
         /// Run it. Without this the command only prints the estimate.
         #[arg(long)]
         yes: bool,
-        /// The most this run may spend, in dollars. Required with `--yes`.
+        /// Stop this one run if it would cost more than this much model time.
+        /// Your plan already sets a ceiling, and this only lowers it.
         #[arg(long)]
         max_spend: Option<f64>,
         /// Print the report as JSON.

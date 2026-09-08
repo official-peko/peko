@@ -343,28 +343,34 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
         println!();
         if blockers.is_empty() {
             println!("Nothing is stopping this run.");
-            println!(
-                "To run it:  peko audit --yes --max-spend {:.2}",
-                cost.max(0.01)
-            );
+            println!("To run it:  peko audit --yes");
         } else {
-            println!("Fix the above first, then run it with --yes --max-spend N.");
+            println!("Fix the above first, then run it with --yes.");
         }
-        // Printing a price is not a failure, and a blocker is.
+        // Showing what a run would use is not a failure, and a blocker is.
         return Ok(i32::from(!blockers.is_empty()));
     }
 
-    let Some(limit) = max_spend else {
-        return Err(anyhow::anyhow!(
-            "--yes needs --max-spend N. The estimate is ${cost:.2}. \
-             A run without a cap is a run with no answer to how much it cost."
-        ));
-    };
-    if limit < cost {
-        return Err(anyhow::anyhow!(
-            "The estimate is ${cost:.2} and --max-spend is ${limit:.2}. \
-             Raise the limit or narrow the project."
-        ));
+    // --max-spend is optional now, and it lowers a ceiling rather than sets
+    // one. It used to be required, from when a customer paid per run. Under a
+    // subscription the dollars are what the model costs us: the person asking
+    // neither pays them nor can change them, and requiring them to name a
+    // figure invited the reasonable question of whether they were about to be
+    // charged it.
+    //
+    // It stays because the month's budget is shared across runs and can bind
+    // before the count does, so somebody about to audit an unusually large
+    // project may want to stop that one run eating their month.
+    // Absent means the plan decides, which is what the server reads a missing
+    // field as. Sending a huge number instead would be refused, because the
+    // server refuses a cap above the plan's rather than clamping it.
+    if let Some(limit) = max_spend {
+        if limit < cost {
+            return Err(anyhow::anyhow!(
+                "This run is estimated at ${cost:.2} of model time and --max-spend \
+                 is ${limit:.2}. Raise it, narrow the project, or drop the flag."
+            ));
+        }
     }
 
     let body = serde_json::json!({
@@ -372,7 +378,7 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
         "files": files,
         "overrides": overrides,
         "confirm": true,
-        "max_spend_usd": limit,
+        "max_spend_usd": max_spend,
     });
     let response = client()?
         .post(format!("{}/audit", config.api_url))
