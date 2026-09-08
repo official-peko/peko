@@ -107,6 +107,24 @@ fn result_object(finding: &ReportFinding) -> Value {
             physical["region"] = Value::Object(region);
         }
         result["locations"] = json!([{ "physicalLocation": physical }]);
+    } else {
+        // A finding about something absent has no file to name. "This project
+        // has no privacy manifest" is about a file that does not exist, and
+        // pointing at one that does would be a lie for the sake of a line
+        // number.
+        //
+        // Code Scanning still needs somewhere to hang it. A result with no
+        // location is accepted and then shown nowhere a reviewer looks, so it
+        // is anchored at the project root: the thing the finding is actually
+        // about. No region, because there is no line.
+        result["locations"] = json!([{
+            "physicalLocation": {
+                "artifactLocation": {
+                    "uri": ".",
+                    "uriBaseId": "%SRCROOT%",
+                }
+            }
+        }]);
     }
 
     if let Some(confidence) = finding.confidence {
@@ -314,10 +332,14 @@ mod tests {
         );
     }
 
+    /// A finding about a missing file is anchored at the project root.
+    ///
+    /// It has nothing to point at, and pointing at a file that does exist
+    /// would be a lie for the sake of a line number. But Code Scanning accepts
+    /// a result with no location and then shows it nowhere a reviewer looks,
+    /// so it goes on the root: the thing the finding is actually about.
     #[test]
-    fn a_finding_with_no_line_still_reports() {
-        // A rule about a missing file has nothing to point at. Dropping the
-        // finding would hide it, so the location goes and the result stays.
+    fn a_finding_with_no_line_is_anchored_at_the_project_root() {
         let mut report = sample();
         let id = report.findings[0].rule_id.to_string();
         report.findings[0].location = None;
@@ -326,7 +348,13 @@ mod tests {
             .iter()
             .find(|r| r["ruleId"] == id)
             .expect("the finding survived");
-        assert!(found.get("locations").is_none());
+
+        let physical = &found["locations"][0]["physicalLocation"];
+        assert_eq!(physical["artifactLocation"]["uri"], ".");
+        assert!(
+            physical.get("region").is_none(),
+            "there is no line, so there must be no region"
+        );
     }
 
     #[test]

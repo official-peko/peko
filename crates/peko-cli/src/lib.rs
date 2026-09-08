@@ -13,6 +13,7 @@ pub mod config;
 pub mod gather;
 pub mod local;
 pub mod render;
+pub mod style;
 pub mod update;
 
 use anyhow::{Context, Result};

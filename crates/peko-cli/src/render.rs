@@ -2,62 +2,95 @@
 
 use serde_json::Value;
 
-/// The report as text.
+/// The report as text, coloured when the terminal is one.
 pub fn report(body: &Value) -> String {
+    report_styled(body, crate::style::Style::detect())
+}
+
+/// The report, with the styling decided by the caller.
+///
+/// Laid out the way rustc lays out an error, because the people reading this
+/// read that every day: what happened on one line, where underneath it, then
+/// the detail and what to do. A wall of evenly indented text makes somebody
+/// hunt for the file name, and the file name is what they came for.
+#[allow(clippy::too_many_lines)]
+pub fn report_styled(body: &Value, style: crate::style::Style) -> String {
     use std::fmt::Write as _;
     let mut out = String::new();
     let findings = body["findings"].as_array().cloned().unwrap_or_default();
 
     let counts = &body["summary"]["by_severity"];
+    let errors = counts["error"].as_u64().unwrap_or(0);
+    let warnings = counts["warning"].as_u64().unwrap_or(0);
+    let infos = counts["info"].as_u64().unwrap_or(0);
+
+    // The counts read as a sentence rather than a table, and the ones that are
+    // zero are still shown. "1 error" beside nothing else invites the question
+    // of whether the others were checked.
     let _ = writeln!(
         out,
         "{} findings: {} error, {} warning, {} info",
         findings.len(),
-        counts["error"].as_u64().unwrap_or(0),
-        counts["warning"].as_u64().unwrap_or(0),
-        counts["info"].as_u64().unwrap_or(0),
+        style.severity_count("error", errors),
+        style.severity_count("warning", warnings),
+        style.severity_count("info", infos),
     );
 
     if findings.is_empty() {
-        let _ = writeln!(out, "\nNothing to fix.");
+        let _ = writeln!(out, "\n{}", style.fix("Nothing to fix."));
     }
 
     let _ = writeln!(out);
     for finding in &findings {
-        let severity = finding["severity"]
-            .as_str()
-            .unwrap_or("info")
-            .to_uppercase();
+        let severity = finding["severity"].as_str().unwrap_or("info");
         let overridden = if finding["overridden"].as_bool().unwrap_or(false) {
-            " (acknowledged)"
+            style.dim(" (acknowledged)")
         } else {
-            ""
+            String::new()
         };
+
+        // severity, then the rule, then what it is. The rule id is dim because
+        // it is a reference to look up, not the thing being said.
         let _ = writeln!(
             out,
-            "{severity}{overridden}  {}  {}",
-            finding["rule_id"].as_str().unwrap_or(""),
-            finding["title"].as_str().unwrap_or(""),
+            "{}{overridden}  {}  {}",
+            style.severity(severity),
+            style.dim(finding["rule_id"].as_str().unwrap_or("")),
+            style.bold(finding["title"].as_str().unwrap_or("")),
         );
+
         if let Some(location) = finding["location"].as_object() {
             let line = location
                 .get("line_start")
                 .and_then(serde_json::Value::as_u64)
                 .map_or_else(String::new, |line| format!(":{line}"));
+            let file = location
+                .get("file")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("");
+            // The arrow is rustc's, and an editor or a terminal that links
+            // file paths picks this shape up.
             let _ = writeln!(
                 out,
-                "    {}{line}",
-                location
-                    .get("file")
-                    .and_then(serde_json::Value::as_str)
-                    .unwrap_or("")
+                "  {} {}",
+                style.dim("-->"),
+                style.place(&format!("{file}{line}"))
             );
         }
         if let Some(message) = finding["message"].as_str() {
-            let _ = writeln!(out, "    {message}");
+            for line in wrap(message, 76) {
+                let _ = writeln!(out, "      {line}");
+            }
         }
         if let Some(fix) = finding["remediation"]["summary"].as_str() {
-            let _ = writeln!(out, "    Fix: {fix}");
+            let wrapped = wrap(fix, 72);
+            for (index, line) in wrapped.iter().enumerate() {
+                if index == 0 {
+                    let _ = writeln!(out, "      {} {line}", style.fix("fix:"));
+                } else {
+                    let _ = writeln!(out, "           {line}");
+                }
+            }
         }
         let _ = writeln!(out);
     }
@@ -70,12 +103,38 @@ pub fn report(body: &Value) -> String {
             let names: Vec<&str> = assumed.iter().filter_map(Value::as_str).collect();
             let _ = writeln!(
                 out,
-                "Assumed, because nobody answered: {}.\nAnswer any of these in .pekorc.json.",
-                names.join(", ")
+                "{}\nAnswer any of these in .pekorc.json.",
+                style.dim(&format!(
+                    "Assumed, because nobody answered: {}.",
+                    names.join(", ")
+                ))
             );
         }
     }
     out
+}
+
+/// Break a paragraph at a width, on spaces.
+///
+/// A message that runs past the terminal wraps wherever the terminal decides,
+/// which is mid word and hard against the left margin, and the indent that
+/// grouped it with its finding is lost.
+fn wrap(text: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in text.split_whitespace() {
+        if !line.is_empty() && line.chars().count() + 1 + word.chars().count() > width {
+            lines.push(std::mem::take(&mut line));
+        }
+        if !line.is_empty() {
+            line.push(' ');
+        }
+        line.push_str(word);
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines
 }
 
 /// A rule listing as a table.
@@ -201,7 +260,7 @@ mod tests {
         }])));
         assert!(text.contains("AAPL-API-001"), "{text}");
         assert!(text.contains("App/View.swift:24"), "{text}");
-        assert!(text.contains("Fix: Use WKWebView."), "{text}");
+        assert!(text.contains("fix: Use WKWebView."), "{text}");
     }
 
     #[test]
@@ -230,7 +289,7 @@ mod tests {
     fn the_report_names_what_the_run_assumed() {
         let mut value = body(&json!([]));
         value["coverage"]["assumed_facts"] = json!(["mac_app_store", "shows_ads"]);
-        let text = report(&value);
+        let text = report_styled(&value, crate::style::Style::plain());
         assert!(text.contains("mac_app_store"), "{text}");
         assert!(text.contains(".pekorc.json"), "{text}");
     }
@@ -371,5 +430,98 @@ mod estimate_tests {
             "summary": "s", "rules": [], "cached": ["A", "B"], "blockers": []
         }));
         assert!(text.contains("2 rules are answered already"), "{text}");
+    }
+}
+
+#[cfg(test)]
+mod colour_tests {
+    use super::report_styled;
+    use crate::style::Style;
+    use serde_json::json;
+
+    fn sample() -> serde_json::Value {
+        json!({
+            "summary": { "by_severity": { "error": 1, "warning": 0, "info": 0 } },
+            "findings": [{
+                "rule_id": "AAPL-API-001",
+                "title": "A removed API is still called",
+                "severity": "error",
+                "overridden": false,
+                "message": "UIWebView is called in App/View.swift",
+                "location": { "file": "App/View.swift", "line_start": 24 },
+                "remediation": { "summary": "Use WKWebView." }
+            }],
+            "coverage": { "assumed_facts": [] }
+        })
+    }
+
+    /// A report read by a script must carry no escape codes.
+    ///
+    /// This output is piped into grep and awk as often as it is read, and a
+    /// colour code in the middle of a rule id turns a working pipeline into a
+    /// puzzle.
+    #[test]
+    fn plain_output_holds_no_escape_codes() {
+        let text = report_styled(&sample(), Style::plain());
+        assert!(
+            !text.contains('\u{1b}'),
+            "a plain report must be plain: {text:?}"
+        );
+        assert!(text.contains("error  AAPL-API-001"));
+        assert!(text.contains("--> App/View.swift:24"));
+        assert!(text.contains("fix: Use WKWebView."));
+    }
+
+    /// The words carry the meaning, and the colour only repeats it.
+    ///
+    /// A reader who cannot tell red from amber, or who is reading a
+    /// transcript, still has to be able to work out which findings block a
+    /// release.
+    #[test]
+    fn the_severity_is_written_out_whether_or_not_it_is_coloured() {
+        for style in [Style::plain(), Style::forced()] {
+            let text = report_styled(&sample(), style);
+            let stripped: String = strip(&text);
+            assert!(
+                stripped.contains("error  AAPL-API-001"),
+                "the severity has to be a word, not only a colour: {stripped}"
+            );
+            assert!(stripped.contains("App/View.swift:24"));
+        }
+    }
+
+    /// A long message wraps rather than running off the terminal.
+    #[test]
+    fn a_long_message_is_wrapped() {
+        let mut value = sample();
+        value["findings"][0]["message"] = json!(
+            "A very long message that goes on well past the width of any \
+             sensible terminal window and would otherwise wrap wherever the \
+             terminal decided, which is mid word and hard against the margin."
+        );
+        let text = report_styled(&value, Style::plain());
+        for line in text.lines() {
+            assert!(
+                line.chars().count() <= 90,
+                "a line ran past the width: {line:?}"
+            );
+        }
+    }
+
+    fn strip(text: &str) -> String {
+        let mut out = String::new();
+        let mut chars = text.chars();
+        while let Some(c) = chars.next() {
+            if c == '\u{1b}' {
+                for c in chars.by_ref() {
+                    if c == 'm' {
+                        break;
+                    }
+                }
+            } else {
+                out.push(c);
+            }
+        }
+        out
     }
 }
