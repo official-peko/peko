@@ -51,6 +51,11 @@ Both hold a full `facts` block in `.pekorc.json`. The audit refuses to start
 while a fact a rule needs has no answer, so a project without one stops before
 it reads anything.
 
+Both ship to `["US", "US-CA", "eu"]`, which is every value the rules read for
+`distributes_in`. Those three switch on 33 more rules between them, which is
+most of the privacy and consent side of the database. Any other string parses
+and matches nothing.
+
 ## Why both pairs exist
 
 A lint that reports a problem in every project is worth as little as one that

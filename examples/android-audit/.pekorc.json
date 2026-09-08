@@ -3,7 +3,7 @@
   "platform": "android",
   "api_key_env": "PEKO_API_KEY",
   "facts": {
-    "distributes_in": ["US", "GB", "DE"],
+    "distributes_in": ["US", "US-CA", "eu"],
     "platform": "android",
     "framework": "compose",
     "mac_app_store": false,

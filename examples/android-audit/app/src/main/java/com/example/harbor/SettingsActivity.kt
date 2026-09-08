@@ -37,6 +37,9 @@ class SettingsActivity : ComponentActivity() {
                     TextButton(onClick = { open("https://harborapp.example/support") }) {
                         Text("Support")
                     }
+                    TextButton(onClick = { open("https://harborapp.example/do-not-sell") }) {
+                        Text("Do Not Sell or Share My Personal Information")
+                    }
                     TextButton(onClick = {
                         Session.signOut()
                         finish()

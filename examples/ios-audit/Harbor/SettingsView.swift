@@ -20,6 +20,10 @@ struct SettingsView: View {
             Section {
                 Link("Privacy policy", destination: URL(string: "https://harborapp.example/privacy")!)
                 Link("Support", destination: URL(string: "https://harborapp.example/support")!)
+                Link(
+                    "Do Not Sell or Share My Personal Information",
+                    destination: URL(string: "https://harborapp.example/do-not-sell")!
+                )
             }
 
             Section {

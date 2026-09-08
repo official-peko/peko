@@ -47,6 +47,19 @@ pub struct Question {
     pub blocks: Vec<String>,
 }
 
+/// A value written into a list fact that no rule anywhere reads.
+///
+/// Almost always a spelling. `distributes_in` takes `eu`, `US`, and `US-CA`,
+/// and a file that says `GB` reads as answered while switching nothing on.
+/// Nothing complained, and the rules those 33 entries gate stayed quiet.
+#[derive(Debug, Clone, Serialize)]
+pub struct Unread {
+    pub fact: String,
+    pub value: String,
+    /// The values that do switch a rule on, in the order the database holds.
+    pub understood: Vec<String>,
+}
+
 /// An answer already in hand.
 #[derive(Debug, Clone, Serialize)]
 pub struct Answer {
@@ -60,6 +73,8 @@ pub struct Answer {
 pub struct Plan {
     pub answered: Vec<Answer>,
     pub questions: Vec<Question>,
+    /// Values written into a list fact that no rule reads.
+    pub unread: Vec<Unread>,
     /// Rules that decide without any further answer.
     pub decided: usize,
 }
@@ -164,8 +179,122 @@ pub fn plan(project: &Project, config: &PekoConfig, database: &RuleDatabase) -> 
         .collect();
 
     Plan {
+        unread: unread_values(config, database),
         answered,
         questions,
         decided,
+    }
+}
+
+/// Values in a list fact that match no precondition in the database.
+///
+/// A list fact is free text, so a wrong entry is silent: it reads as an
+/// answer, and every rule it was meant to switch on stays off. Only
+/// `fact_contains` is considered, because that is the only test that compares
+/// against a value inside a list.
+fn unread_values(config: &PekoConfig, database: &RuleDatabase) -> Vec<Unread> {
+    let mut understood: BTreeMap<&str, Vec<String>> = BTreeMap::new();
+    for rule in database.rules() {
+        for condition in &rule.detection.applies_when {
+            collect_contains(condition, &mut understood);
+        }
+    }
+
+    let mut unread = Vec::new();
+    for fact in facts::declared().filter(|fact| fact.shape == facts::Shape::TextList) {
+        let Some(known) = understood.get(fact.name) else {
+            // No rule reads this fact by value at all, so nothing about the
+            // entries can be wrong.
+            continue;
+        };
+        let Some(written) = config.fact(fact.name).and_then(|v| v.as_array()) else {
+            continue;
+        };
+        for value in written.iter().filter_map(|v| v.as_str()) {
+            if !known.iter().any(|k| k == value) {
+                unread.push(Unread {
+                    fact: fact.name.to_string(),
+                    value: value.to_string(),
+                    understood: known.clone(),
+                });
+            }
+        }
+    }
+    unread
+}
+
+/// Walk a precondition, including the ones that nest others.
+fn collect_contains<'a>(
+    condition: &'a peko_rules::Precondition,
+    into: &mut BTreeMap<&'a str, Vec<String>>,
+) {
+    match condition {
+        peko_rules::Precondition::FactContains { key, value } => {
+            if let Some(text) = value.as_str() {
+                let known = into.entry(key.as_str()).or_default();
+                if !known.iter().any(|k| k == text) {
+                    known.push(text.to_string());
+                }
+            }
+        }
+        peko_rules::Precondition::AnyOf { conditions } => {
+            for nested in conditions {
+                collect_contains(nested, into);
+            }
+        }
+        _ => {}
+    }
+}
+
+#[cfg(test)]
+mod unread_tests {
+    use super::unread_values;
+    use crate::config::PekoConfig;
+
+    fn database() -> peko_rules::RuleDatabase {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(std::path::Path::parent)
+            .expect("the repository root")
+            .join("rules");
+        peko_rules::RuleDatabase::load_from_dir(root).expect("the rule database loads")
+    }
+
+    fn config(places: &[&str]) -> PekoConfig {
+        let json = serde_json::json!({
+            "version": 1,
+            "platform": "ios",
+            "facts": {"distributes_in": places},
+        });
+        serde_json::from_value(json).expect("the config parses")
+    }
+
+    /// The bug this catches. `distributes_in` takes `eu`, `US`, and `US-CA`,
+    /// and two examples shipped saying `GB` and `DE`. Both parsed, both read
+    /// as answered, and every rule those entries were meant to switch on
+    /// stayed off. Nothing said so.
+    #[test]
+    fn a_place_no_rule_reads_is_named() {
+        let found = unread_values(&config(&["US", "GB", "DE"]), &database());
+        let values: Vec<&str> = found.iter().map(|u| u.value.as_str()).collect();
+        assert_eq!(values, ["GB", "DE"], "{found:?}");
+        assert!(
+            found[0].understood.iter().any(|k| k == "eu"),
+            "the message has to say what does work: {:?}",
+            found[0].understood
+        );
+    }
+
+    #[test]
+    fn the_values_the_rules_read_are_not_named() {
+        assert!(unread_values(&config(&["US", "US-CA", "eu"]), &database()).is_empty());
+    }
+
+    /// A fact nobody wrote cannot hold a wrong value.
+    #[test]
+    fn an_unanswered_fact_says_nothing() {
+        let json = serde_json::json!({"version": 1, "platform": "ios", "facts": {}});
+        let config: PekoConfig = serde_json::from_value(json).expect("the config parses");
+        assert!(unread_values(&config, &database()).is_empty());
     }
 }
