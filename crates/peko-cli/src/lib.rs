@@ -331,7 +331,7 @@ fn config_above(root: &Path) -> Option<std::path::PathBuf> {
 ///
 /// The estimate always runs first and it always costs nothing. `--yes` is the
 /// only thing that spends money, and it needs a number with it.
-pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Result<i32> {
+pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
     let config = Config::load(root)?;
     let key = config.api_key()?;
     let (files, skipped) = gather::collect(root, &[]);
@@ -367,7 +367,6 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
         serde_json::from_str(&text)?
     };
 
-    let cost = estimate["estimated_cost_usd"].as_f64().unwrap_or(0.0);
     let blockers = estimate["blockers"].as_array().cloned().unwrap_or_default();
 
     if !yes {
@@ -383,34 +382,16 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
         return Ok(i32::from(!blockers.is_empty()));
     }
 
-    // --max-spend is optional now, and it lowers a ceiling rather than sets
-    // one. It used to be required, from when a customer paid per run. Under a
-    // subscription the dollars are what the model costs us: the person asking
-    // neither pays them nor can change them, and requiring them to name a
-    // figure invited the reasonable question of whether they were about to be
-    // charged it.
-    //
-    // It stays because the month's budget is shared across runs and can bind
-    // before the count does, so somebody about to audit an unusually large
-    // project may want to stop that one run eating their month.
-    // Absent means the plan decides, which is what the server reads a missing
-    // field as. Sending a huge number instead would be refused, because the
-    // server refuses a cap above the plan's rather than clamping it.
-    if let Some(limit) = max_spend {
-        if limit < cost {
-            return Err(anyhow::anyhow!(
-                "This run is estimated at ${cost:.2} of model time and --max-spend \
-                 is ${limit:.2}. Raise it, narrow the project, or drop the flag."
-            ));
-        }
-    }
-
+    // Nothing here names a cap. The plan sets what one run may cost and the
+    // server holds it. A subscriber pays a flat price each month, so the
+    // dollars are what the model costs us rather than anything they owe, and
+    // a flag asking them to name one invited the reasonable question of
+    // whether they were about to be charged it.
     let body = serde_json::json!({
         "platform": config.platform,
         "files": files,
         "overrides": overrides,
         "confirm": true,
-        "max_spend_usd": max_spend,
     });
     let response = client()?
         .post(format!("{}/audit", config.api_url))
@@ -449,7 +430,6 @@ pub fn audit(root: &Path, yes: bool, max_spend: Option<f64>, json: bool) -> Resu
     }
     print!("{}", render::report(&report["report"]));
     println!();
-    println!("Spent ${:.2}.", report["spent_usd"].as_f64().unwrap_or(0.0));
     Ok(render::exit_code(&report["report"], "error"))
 }
 

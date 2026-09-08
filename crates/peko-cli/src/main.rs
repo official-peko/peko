@@ -69,10 +69,6 @@ enum Command {
         /// Run it. Without this the command only prints the estimate.
         #[arg(long)]
         yes: bool,
-        /// Stop this one run if it would cost more than this much model time.
-        /// Your plan already sets a ceiling, and this only lowers it.
-        #[arg(long)]
-        max_spend: Option<f64>,
         /// Print the report as JSON.
         #[arg(long)]
         json: bool,
@@ -177,12 +173,7 @@ fn run() -> Result<i32> {
         ),
         Command::Init { path, platform } => init(&path, platform.as_deref()),
         Command::Facts { path, write } => facts(&project(&path), write),
-        Command::Audit {
-            path,
-            yes,
-            max_spend,
-            json,
-        } => audit(&project(&path), yes, max_spend, json),
+        Command::Audit { path, yes, json } => audit(&project(&path), yes, json),
         Command::Override {
             rule_id,
             reason,

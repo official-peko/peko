@@ -426,24 +426,24 @@ mod estimate_tests {
     #[test]
     fn the_price_comes_before_the_problems() {
         let body = json!({
-            "summary": "4 rules would read your code, about $0.42",
+            "summary": "4 rules would read your code",
             "rules": [],
             "cached": [],
             "blockers": [{"reason": "lint_failing", "message": "The free checks report 2 errors."}],
         });
         let text = estimate_styled(&body, crate::style::Style::plain());
-        let price = text.find("$0.42").expect("the price is printed");
+        let what = text.find("would read").expect("the summary is printed");
         let problem = text.find("free checks").expect("the blocker is printed");
         assert!(
-            price < problem,
-            "the problems came before the price:\n{text}"
+            what < problem,
+            "the problems came before what the run would do:\n{text}"
         );
     }
 
     #[test]
     fn a_clean_estimate_lists_no_problems() {
         let body = json!({
-            "summary": "1 rule, about $0.10",
+            "summary": "1 rule",
             "rules": [{"rule_id": "AAPL-PRIV-001", "estimated_cost_usd": 0.1, "files": ["a.swift"]}],
             "cached": [],
             "blockers": [],
@@ -578,7 +578,7 @@ mod allowance_tests {
 
     fn body() -> serde_json::Value {
         json!({
-            "summary": "12 rules would read your code, about $1.20 with the model",
+            "summary": "12 rules would read your code",
             "rules": [{"rule_id": "app-store-5.1.1", "files": ["a", "b"]}],
             "cached": [],
             "allowance": {"audits_used": 6, "audits_included": 25, "resets_on": "2026-10-01"},
@@ -587,15 +587,17 @@ mod allowance_tests {
 
     /// The first line answers the question somebody actually has, which is
     /// what this run costs them. A subscriber pays no dollars per run.
+    /// No money anywhere in the estimate.
+    ///
+    /// A subscriber pays a flat price each month. The dollars an audit costs
+    /// are what the model charges us, and a figure in their terminal answers
+    /// a question they do not have while raising one they do: am I about to
+    /// be billed that. The count is the thing that is actually theirs.
     #[test]
-    fn the_count_comes_before_the_dollars() {
+    fn the_estimate_names_a_count_and_never_a_price() {
         let out = estimate_styled(&body(), Style::plain());
-        let counts = out.find("19 of 25").expect("the audits left are named");
-        let dollars = out.find("$1.20").expect("the model cost is still shown");
-        assert!(
-            counts < dollars,
-            "the price led the estimate and read as a charge:\n{out}"
-        );
+        assert!(!out.contains('$'), "a price reached the terminal:\n{out}");
+        assert!(out.contains("19 of 25"), "{out}");
         assert!(out.contains("uses one audit"));
         assert!(out.contains("resets on 2026-10-01"));
     }

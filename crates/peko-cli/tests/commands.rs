@@ -282,9 +282,7 @@ fn audit_without_yes_prints_the_price_and_spends_nothing() {
     let (root, _endpoint) = project("audit-quote", &server.url(), &files());
     let key = "audit-quote";
 
-    let code = with_key(key, || {
-        peko_cli::audit(&root, false, None, false).expect("runs")
-    });
+    let code = with_key(key, || peko_cli::audit(&root, false, false).expect("runs"));
     assert_eq!(code, 0, "a price with nothing blocking it is not a failure");
 
     let seen = server.requests();
@@ -307,14 +305,12 @@ fn audit_without_yes_fails_when_something_blocks_it() {
     let (root, _endpoint) = project("audit-blocked", &server.url(), &files());
     let key = "audit-blocked";
 
-    let code = with_key(key, || {
-        peko_cli::audit(&root, false, None, false).expect("runs")
-    });
+    let code = with_key(key, || peko_cli::audit(&root, false, false).expect("runs"));
     assert_eq!(code, 1, "a blocker must fail the run");
 }
 
 #[test]
-fn audit_with_yes_and_no_limit_runs_and_leaves_the_cap_to_the_plan() {
+fn audit_sends_no_spend_field_and_leaves_the_cap_to_the_plan() {
     // The cap used to be required with --yes, from when a customer paid per
     // run. Under a subscription the dollars are what the model costs the
     // server: the person asking neither pays them nor can change them.
@@ -346,9 +342,7 @@ fn audit_with_yes_and_no_limit_runs_and_leaves_the_cap_to_the_plan() {
     let (root, _endpoint) = project("audit-nolimit", &server.url(), &files());
     let key = "audit-nolimit";
 
-    let code = with_key(key, || {
-        peko_cli::audit(&root, true, None, false).expect("runs")
-    });
+    let code = with_key(key, || peko_cli::audit(&root, true, false).expect("runs"));
     assert_eq!(code, 0, "a clean report must pass");
 
     let seen = server.requests();
@@ -358,24 +352,46 @@ fn audit_with_yes_and_no_limit_runs_and_leaves_the_cap_to_the_plan() {
         .expect("the job must have been started");
     let body: serde_json::Value = serde_json::from_str(&start.body).expect("the body is JSON");
     assert!(
-        body["max_spend_usd"].is_null(),
-        "a cap the caller never named must not be invented: {}",
+        body.get("max_spend_usd").is_none(),
+        "the request must carry no spend field at all: {}",
         start.body
     );
 }
 
 #[test]
-fn audit_refuses_a_limit_under_the_estimate_without_starting_a_job() {
+fn the_terminal_never_shows_what_a_run_costs() {
+    // A subscriber pays a flat price each month. What an audit costs is what
+    // the model charges us, so a figure in their terminal answers a question
+    // they do not have and raises one they do: am I about to be billed that.
     let server = Server::start(vec![(200, estimate_answer(2.00, &serde_json::json!([])))]);
-    let (root, _endpoint) = project("audit-cheap", &server.url(), &files());
-    let key = "audit-cheap";
+    let (root, _endpoint) = support::project("audit-quiet", &server.url(), &files());
 
-    let error = with_key(key, || {
-        peko_cli::audit(&root, true, Some(0.50), false).expect_err("must refuse")
+    let printed = with_key("audit-quiet", || {
+        peko_cli::render::estimate_styled(
+            &serde_json::json!({
+                "summary": "12 rules would read your code",
+                "rules": [{"rule_id": "AAPL-PRIV-001", "files": ["a.swift"]}],
+                "cached": [],
+                "blockers": [],
+                "allowance": {"audits_used": 2, "audits_included": 15, "resets_on": "2026-10-01"},
+            }),
+            peko_cli::style::Style::plain(),
+        )
     });
-    let text = error.to_string();
-    assert!(text.contains("$2.00") && text.contains("$0.50"), "{text}");
-    assert_eq!(server.hits(), 1, "the audit was started anyway");
+    assert!(
+        !printed.contains('$'),
+        "a price reached the terminal:\n{printed}"
+    );
+
+    let code = with_key("audit-quiet", || {
+        peko_cli::audit(&root, false, false).expect("runs")
+    });
+    assert_eq!(code, 0);
+    assert_eq!(
+        server.hits(),
+        1,
+        "without --yes only the estimate may be called"
+    );
 }
 
 #[test]
@@ -411,9 +427,7 @@ fn audit_starts_a_job_and_polls_until_it_finishes() {
     let (root, _endpoint) = project("audit-job", &server.url(), &files());
     let key = "audit-job";
 
-    let code = with_key(key, || {
-        peko_cli::audit(&root, true, Some(5.0), false).expect("runs")
-    });
+    let code = with_key(key, || peko_cli::audit(&root, true, false).expect("runs"));
     assert_eq!(code, 0, "a clean report must pass");
 
     let seen = server.requests();
@@ -453,7 +467,7 @@ fn audit_reports_a_failed_job_as_an_error_and_not_a_pass() {
     let key = "audit-failed";
 
     let error = with_key(key, || {
-        peko_cli::audit(&root, true, Some(5.0), false).expect_err("must fail")
+        peko_cli::audit(&root, true, false).expect_err("must fail")
     });
     assert!(error.to_string().contains("stopped answering"), "{error}");
 }
@@ -644,7 +658,7 @@ fn a_run_from_a_source_directory_uses_the_project_config() {
     assert!(inner.is_dir(), "the fixture has a source directory");
 
     let code = with_key("subdir", || {
-        peko_cli::audit(&peko_cli::config::project_root(&inner), false, None, false).expect("runs")
+        peko_cli::audit(&peko_cli::config::project_root(&inner), false, false).expect("runs")
     });
     assert_eq!(code, 0);
 
