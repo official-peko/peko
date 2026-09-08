@@ -8,6 +8,27 @@ no model, and needs no account.
 
 ## Install
 
+macOS and Linux:
+
+```bash
+curl -fsSL https://peko.so/install.sh | sh
+```
+
+Windows, in PowerShell:
+
+```powershell
+irm https://peko.so/install.ps1 | iex
+```
+
+Both work out the build for your machine, download it from the release, check
+it against the checksum published beside it, and install one file. Neither
+needs an account. Read
+[install.sh](https://peko.so/install.sh) or
+[install.ps1](https://peko.so/install.ps1) before you run either, which is the
+sensible thing to do with any script somebody tells you to pipe into a shell.
+
+### By hand
+
 Pick the file for your machine.
 
 | Machine | File |
@@ -54,6 +75,20 @@ peko lint --all
 
 The first run works offline. The rule database ships inside the binary, and
 nothing leaves your machine.
+
+### Something to try it on
+
+`examples/ios-app` and `examples/android-app` carry real problems on purpose:
+an empty purpose string, no privacy manifest, `QUERY_ALL_PACKAGES`, cleartext
+traffic, a target API below what Google Play accepts.
+
+```bash
+git clone https://github.com/official-peko/peko
+peko lint --all peko/examples/ios-app
+```
+
+Three findings on that one and five on the Android one. Fix them and watch
+them go.
 
 ## In a pull request
 
