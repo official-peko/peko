@@ -1,0 +1,11 @@
+PODS:
+  - AppsFlyerFramework (6.13.0)
+  - FirebaseAnalytics (10.24.0)
+  - Alamofire (5.9.1)
+
+DEPENDENCIES:
+  - AppsFlyerFramework (~> 6.13)
+  - FirebaseAnalytics (~> 10.24)
+  - Alamofire (~> 5.9)
+
+COCOAPODS: 1.15.2

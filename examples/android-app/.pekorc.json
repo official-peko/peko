@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "platform": "android",
+  "api_key_env": "PEKO_API_KEY"
+}

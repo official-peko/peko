@@ -1,0 +1,86 @@
+name: The action
+
+# Run the action against the example projects, on every platform it claims to
+# support.
+#
+# Nothing did this before. The action was written, documented, and told to
+# people, and no run of it had ever happened. Its install step refused Windows
+# outright while every release shipped a Windows build, and the version the
+# README told people to use resolved to no tag at all.
+#
+# A release is what this tests against, so it runs after one and on demand.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "action.yml"
+      - "examples/**"
+      - ".github/workflows/action.yml"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The release to test, or latest
+        required: false
+        default: latest
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ matrix.os }} / ${{ matrix.example }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # One platform failing must not hide the others. Windows is the one most
+      # likely to break, and it is the one nobody would notice.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        example: [ios-app, android-app]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the action on examples/${{ matrix.example }}
+        id: peko
+        uses: ./
+        with:
+          path: examples/${{ matrix.example }}
+          version: ${{ github.event.inputs.version || 'latest' }}
+          # These examples hold real problems on purpose, so an error is the
+          # expected result and must not fail the job.
+          fail-on: never
+          # Code Scanning takes one SARIF per ref, and six jobs would race to
+          # be the one it kept. The report is checked below instead.
+          upload-sarif: false
+          sarif-file: peko.sarif
+
+      - name: The run found the problems the example carries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s peko.sarif || { echo "the action wrote no SARIF"; exit 1; }
+
+          # An example with no findings is an example that teaches nothing, and
+          # a run reporting none of them is an engine that did not read it.
+          count=$(python3 -c "import json;d=json.load(open('peko.sarif'));print(len(d['runs'][0]['results']))")
+          echo "the run raised $count findings"
+          if [ "$count" -lt 3 ]; then
+            echo "::error::examples/${{ matrix.example }} carries known problems and only $count were found"
+            exit 1
+          fi
+
+          # Every finding has to say where it is, or nobody can act on it.
+          python3 - <<'PY'
+          import json
+          results = json.load(open("peko.sarif"))["runs"][0]["results"]
+          for result in results:
+              rule = result.get("ruleId", "")
+              assert rule, "a finding with no rule id"
+              locations = result.get("locations") or []
+              assert locations, f"{rule} names no file"
+          print(f"every one of {len(results)} findings names a rule and a file")
+          PY
