@@ -365,7 +365,11 @@ pub fn estimate_styled(body: &Value, style: crate::style::Style) -> String {
             style.bold(&left.to_string())
         );
         if let Some(resets) = allowance["resets_on"].as_str().filter(|s| !s.is_empty()) {
-            let _ = writeln!(out, "{}", style.dim(&format!("The count resets on {resets}.")));
+            let _ = writeln!(
+                out,
+                "{}",
+                style.dim(&format!("The count resets on {resets}."))
+            );
         }
         let _ = writeln!(out);
     }
@@ -463,9 +467,12 @@ mod estimate_tests {
 
     #[test]
     fn what_the_cache_already_holds_is_named() {
-        let text = estimate_styled(&json!({
-            "summary": "s", "rules": [], "cached": ["A", "B"], "blockers": []
-        }), crate::style::Style::plain());
+        let text = estimate_styled(
+            &json!({
+                "summary": "s", "rules": [], "cached": ["A", "B"], "blockers": []
+            }),
+            crate::style::Style::plain(),
+        );
         assert!(text.contains("2 rules are answered already"), "{text}");
     }
 }
