@@ -131,6 +131,103 @@ impl Run {
     }
 }
 
+/// A value this machine keeps so two runs join up.
+///
+/// Written beside the project, next to the last run, so it disappears with a
+/// checkout. Not a person, not stable across machines, and nothing anywhere
+/// can turn it back into one.
+#[must_use]
+pub fn anon_id(root: &std::path::Path) -> String {
+    let path = root.join(".peko/anon-id");
+    if let Ok(existing) = std::fs::read_to_string(&path) {
+        let trimmed = existing.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+    let fresh = uuid_like();
+    if std::fs::create_dir_all(root.join(".peko")).is_ok() {
+        let _ = std::fs::write(&path, format!("{fresh}\n"));
+    }
+    fresh
+}
+
+/// A random hex string.
+///
+/// Not a real UUID and it does not need to be. Nothing joins on it across
+/// systems, and pulling in a UUID crate for a value only ever compared to
+/// itself is a dependency for nothing.
+fn uuid_like() -> String {
+    use std::fmt::Write as _;
+    use std::hash::{BuildHasher as _, Hasher as _};
+    let mut out = String::with_capacity(32);
+    for _ in 0..2 {
+        let mut hasher = std::collections::hash_map::RandomState::new().build_hasher();
+        hasher.write_u128(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|since| since.as_nanos())
+                .unwrap_or_default(),
+        );
+        let _ = write!(out, "{:016x}", hasher.finish());
+    }
+    out
+}
+
+/// Measure a command, and report it if nobody said not to.
+///
+/// Wraps the work rather than sitting inside it, so a command cannot forget
+/// to report and cannot report the wrong duration. The result of the work is
+/// handed straight back untouched.
+pub fn around<F>(
+    root: &std::path::Path,
+    command: &'static str,
+    endpoint: &str,
+    key: Option<&str>,
+    config_says: Option<bool>,
+    shape: Shape,
+    work: F,
+) -> anyhow::Result<i32>
+where
+    F: FnOnce() -> anyhow::Result<i32>,
+{
+    let started = std::time::Instant::now();
+    let outcome = work();
+    if !allowed(&Asked::read(config_says)) {
+        return outcome;
+    }
+    let run = Run {
+        command,
+        milliseconds: u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX),
+        // A run that ended in an error is the interesting one. Reporting the
+        // exit code as zero because the Result was an Err would hide exactly
+        // the runs worth looking at.
+        code: match &outcome {
+            Ok(code) => *code,
+            Err(_) => -1,
+        },
+        platform: shape.platform,
+        framework: shape.framework,
+        files: shape.files,
+        errors: shape.errors,
+        warnings: shape.warnings,
+        infos: shape.infos,
+    };
+    report(endpoint, key, &anon_id(root), &run);
+    outcome
+}
+
+/// What the run was working on. Filled in by the command as it learns it.
+#[derive(Debug, Clone, Default)]
+pub struct Shape {
+    pub platform: Option<String>,
+    pub framework: Option<String>,
+    pub files: usize,
+    pub errors: u64,
+    pub warnings: u64,
+    pub infos: u64,
+}
+
 /// Send it, and never let it matter.
 pub fn report(endpoint: &str, key: Option<&str>, anon_id: &str, run: &Run) {
     let Ok(client) = reqwest::blocking::Client::builder()

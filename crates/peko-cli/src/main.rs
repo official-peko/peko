@@ -7,7 +7,7 @@
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use peko_cli::{add_override, audit, facts, init, lint, login, rules, status};
+use peko_cli::{add_override, audit, facts, init, lint, login, report_outcome, rules, status};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -75,6 +75,27 @@ enum Command {
     },
 
     /// Read what the project answers for itself, and list what is left.
+    /// Tell us what the store decided.
+    ///
+    /// The one thing that says whether a finding was right. It attaches to
+    /// the last audit you ran here.
+    Outcome {
+        /// approved, rejected, or withdrawn.
+        result: String,
+        /// The project root.
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// The guideline sections the store cited, comma separated.
+        #[arg(long)]
+        sections: Option<String>,
+        /// What the store wrote.
+        #[arg(long)]
+        notes: Option<String>,
+        /// A file holding what the store wrote.
+        #[arg(long)]
+        notes_file: Option<PathBuf>,
+    },
+
     Facts {
         #[arg(default_value = ".")]
         path: PathBuf,
@@ -126,6 +147,41 @@ fn main() {
     }
 }
 
+/// Run a command, and report how it went unless somebody said not to.
+///
+/// The wrapper exists so a command cannot forget to report and cannot report
+/// the wrong duration. The three ways to say no are read here, once, and the
+/// send is best effort with a short timeout: a lint that found the problem
+/// has done its job whatever the network did.
+fn measured<F>(root: &std::path::Path, command: &'static str, work: F) -> Result<i32>
+where
+    F: FnOnce(&std::path::Path) -> Result<i32>,
+{
+    // The config may not parse, or may not exist. Neither is a reason to
+    // fail here: the command itself will say so far better than this can.
+    let config = peko_cli::config::Config::load(root).ok();
+    let endpoint = config
+        .as_ref()
+        .map_or_else(peko_cli::config::default_endpoint, |c| c.api_url.clone());
+    let key = config.as_ref().and_then(|c| c.api_key().ok());
+    let says = config
+        .as_ref()
+        .and_then(peko_cli::config::Config::telemetry);
+    let shape = peko_cli::telemetry::Shape {
+        platform: config.as_ref().map(|c| c.platform.clone()),
+        ..peko_cli::telemetry::Shape::default()
+    };
+    peko_cli::telemetry::around(
+        root,
+        command,
+        &endpoint,
+        key.as_deref(),
+        says,
+        shape,
+        || work(root),
+    )
+}
+
 /// The project this path sits in, and a word about it when it is not the
 /// path itself.
 ///
@@ -159,20 +215,37 @@ fn run() -> Result<i32> {
             sarif,
             fail_on,
             allow_undecided,
-        } => lint(
-            &project(&path),
-            &peko_cli::LintOptions {
-                all,
-                since: &since,
-                platform: platform.as_deref(),
-                json,
-                sarif: sarif.as_deref(),
-                fail_on: &fail_on,
-                allow_undecided,
-            },
-        ),
+        } => measured(&project(&path), "lint", |root| {
+            lint(
+                root,
+                &peko_cli::LintOptions {
+                    all,
+                    since: &since,
+                    platform: platform.as_deref(),
+                    json,
+                    sarif: sarif.as_deref(),
+                    fail_on: &fail_on,
+                    allow_undecided,
+                },
+            )
+        }),
         Command::Init { path, platform } => init(&path, platform.as_deref()),
-        Command::Facts { path, write } => facts(&project(&path), write),
+        Command::Facts { path, write } => {
+            measured(&project(&path), "facts", |root| facts(root, write))
+        }
+        Command::Outcome {
+            result,
+            path,
+            sections,
+            notes,
+            notes_file,
+        } => report_outcome(
+            &project(&path),
+            &result,
+            sections.as_deref(),
+            notes.as_deref(),
+            notes_file.as_deref(),
+        ),
         Command::Audit { path, yes, json } => audit(&project(&path), yes, json),
         Command::Override {
             rule_id,

@@ -17,6 +17,9 @@ name = "peko"
 path = "src/main.rs"
 
 [dependencies]
+# Already in this binary three times over through other crates, so naming
+# it costs nothing and stops a hand rolled date routine existing.
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
 anyhow = "1.0"
 peko-check = { version = "1.4.0", path = "../peko-check" }
 peko-report = { version = "1.4.0", path = "../peko-report" }

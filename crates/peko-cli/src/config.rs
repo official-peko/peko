@@ -56,7 +56,7 @@ fn default_key_env() -> String {
 /// new release, and an old binary keeps the old one. It pointed at
 /// api.peko.dev for every release up to v1.2.1. That domain is not ours, so
 /// login, audit, and facts failed for everybody who installed one.
-fn default_endpoint() -> String {
+pub fn default_endpoint() -> String {
     std::env::var("PEKO_API_URL")
         .ok()
         .filter(|value| !value.trim().is_empty())
@@ -87,6 +87,18 @@ impl Config {
     }
 
     /// The key, read from wherever the config says it lives.
+    /// What `.pekorc.json` says about being measured, if it says anything.
+    ///
+    /// Absent means nobody answered, which is not the same as no. The default
+    /// lives in one place, in `telemetry::allowed`, rather than being decided
+    /// here as well.
+    #[must_use]
+    pub fn telemetry(&self) -> Option<bool> {
+        self.rest
+            .get("telemetry")
+            .and_then(serde_json::Value::as_bool)
+    }
+
     pub fn api_key(&self) -> anyhow::Result<String> {
         // An empty variable is not a key. A CI step that passes an optional
         // input through sets it to the empty string rather than leaving it

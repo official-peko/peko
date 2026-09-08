@@ -12,6 +12,7 @@
 pub mod config;
 pub mod gather;
 pub mod local;
+pub mod outcome;
 pub mod render;
 pub mod style;
 pub mod telemetry;
@@ -425,6 +426,8 @@ pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
     }
     let report = poll_audit(&config, &key, &job, json)?;
 
+    remember_run(root, &job, &report);
+
     if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
         return Ok(render::exit_code(&report["report"], "error"));
@@ -432,6 +435,40 @@ pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
     print!("{}", render::report(&report["report"]));
     println!();
     Ok(render::exit_code(&report["report"], "error"))
+}
+
+/// Write down the audit that just finished.
+///
+/// So a rejection weeks later can be attached to the run that was supposed to
+/// predict it. The rules it raised come along, because the server deletes the
+/// job an hour after it finishes and nothing else remembers them.
+fn remember_run(root: &Path, job: &str, report: &serde_json::Value) {
+    let mut flagged: Vec<String> = report["report"]["findings"]
+        .as_array()
+        .map(|findings| {
+            findings
+                .iter()
+                .filter_map(|finding| finding["rule_id"].as_str())
+                .map(ToString::to_string)
+                .collect()
+        })
+        .unwrap_or_default();
+    flagged.sort();
+    flagged.dedup();
+    outcome::remember(
+        root,
+        &outcome::LastRun {
+            job_id: job.to_string(),
+            finished_on: chrono_date(),
+            flagged,
+        },
+    );
+}
+
+/// Today, as a date. No time, because nothing here needs one and a timestamp
+/// in a file somebody may commit is more precision than the question wants.
+fn chrono_date() -> String {
+    chrono::Utc::now().format("%Y-%m-%d").to_string()
 }
 
 /// How often to ask the server how the audit is going.
@@ -587,6 +624,73 @@ pub fn facts(root: &Path, write: bool) -> Result<i32> {
     println!("\nEdit the facts block in {}.", config::FILE);
     println!("A fact left null makes every rule that reads it stay silent.");
     Ok(1)
+}
+
+/// Report what the store decided.
+///
+/// The only command that tells us whether a finding was right. It attaches to
+/// the last audit run in this project when there was one, because a rejection
+/// arrives days later from a terminal somebody closed and asking them to find
+/// a job id is asking them not to report.
+pub fn report_outcome(
+    root: &Path,
+    result: &str,
+    sections: Option<&str>,
+    notes: Option<&str>,
+    notes_file: Option<&Path>,
+) -> Result<i32> {
+    let config = Config::load(root)?;
+    let key = config.api_key()?;
+    let verdict = outcome::Verdict::parse(result)?;
+    let sections = outcome::sections(sections);
+    let notes = outcome::notes(notes, notes_file)?;
+
+    if verdict == outcome::Verdict::Rejected && sections.is_empty() && notes.is_none() {
+        return Err(anyhow::anyhow!(
+            "a rejection needs what the store cited. Pass --sections 3.1.1 or \
+             --notes-file rejection.txt, or both. Without either there is \
+             nothing to learn from it."
+        ));
+    }
+
+    let last = outcome::last(root);
+    let mut body = serde_json::json!({
+        "platform": config.platform,
+        "result": verdict.as_str(),
+        "sections": sections,
+        "flagged": last.as_ref().map(|run| run.flagged.clone()).unwrap_or_default(),
+    });
+    if let Some(text) = &notes {
+        body["notes"] = serde_json::json!(text);
+    }
+    if let Some(run) = &last {
+        body["job_id"] = serde_json::json!(run.job_id);
+    }
+
+    let response = client()?
+        .post(format!("{}/outcome", config.api_url))
+        .bearer_auth(&key)
+        .json(&body)
+        .send()
+        .context("the server did not answer")?;
+    let status = response.status();
+    let text = response.text().unwrap_or_default();
+    if !status.is_success() {
+        return Err(describe(status, &text));
+    }
+
+    match verdict {
+        outcome::Verdict::Approved => println!("Recorded, and congratulations."),
+        outcome::Verdict::Rejected => println!("Recorded. Sorry about the rejection."),
+        outcome::Verdict::Withdrawn => println!("Recorded."),
+    }
+    if last.is_some() {
+        println!("Attached to your last audit in this project.");
+    } else {
+        println!("No audit from this project was on file, so it stands on its own.");
+    }
+    println!("This is what tells us whether a rule was right. Thank you.");
+    Ok(0)
 }
 
 pub fn add_override(root: &Path, rule_id: &str, reason: &str) -> Result<i32> {
