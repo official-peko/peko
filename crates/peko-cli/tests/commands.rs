@@ -618,6 +618,52 @@ fn init_writes_a_config_and_then_leaves_an_existing_one_alone() {
     let _ = std::fs::remove_dir_all(&root);
 }
 
+/// `peko init` inside a project that already has a config writes nothing.
+///
+/// Somebody ran it in the source directory of a configured project. It wrote
+/// a second config there, reported that the code answered no facts, and asked
+/// for five that the real config one directory up already answers. Nothing
+/// said the real one existed, and an audit started from there would have read
+/// the source directory alone and reported on a fragment of the app.
+#[test]
+fn init_refuses_to_nest_a_second_config() {
+    let root = std::env::temp_dir().join(format!("peko-cli-nest-{}", std::process::id()));
+    let inner = root.join("Sources");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&inner).expect("make it");
+    std::fs::write(
+        root.join(".pekorc.json"),
+        "{\"version\":1,\"platform\":\"ios\"}\n",
+    )
+    .expect("write the real one");
+    std::fs::write(inner.join("Info.plist"), PLIST).expect("write");
+
+    let code = with_key("nest", || {
+        peko_cli::init(&inner, Some("ios")).expect("init runs")
+    });
+    assert_eq!(code, 1, "a refusal that reports success teaches nothing");
+    assert!(
+        !inner.join(".pekorc.json").exists(),
+        "a second config was written inside a configured project"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A project with nothing above it is untouched by the check.
+#[test]
+fn init_still_writes_a_config_with_no_project_above() {
+    let root = std::env::temp_dir().join(format!("peko-cli-free-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("App")).expect("make it");
+    std::fs::write(root.join("App/Info.plist"), PLIST).expect("write");
+
+    with_key("free", || {
+        peko_cli::init(&root, Some("ios")).expect("init runs")
+    });
+    assert!(root.join(".pekorc.json").exists(), "no config was written");
+    let _ = std::fs::remove_dir_all(&root);
+}
+
 #[test]
 fn lint_runs_locally_when_there_is_no_key() {
     // A first run had to find a deployed server and an issued key before it

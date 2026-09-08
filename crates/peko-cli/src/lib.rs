@@ -268,6 +268,25 @@ pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
         println!("Run `peko facts` to fill in what is missing.");
         return Ok(0);
     }
+    // A second config inside a project that already has one splits the
+    // project in two, and the smaller half wins. Every command reads the file
+    // beside it, so a run started here sees the files under here and the
+    // answers written here, and reports on a fragment as though it were the
+    // app. It looks like it worked: a config appears, facts are asked for,
+    // and nothing says the real one is one directory up.
+    if let Some(above) = config_above(root) {
+        println!("{} already covers this directory.", above.display());
+        println!();
+        println!("A second one here would split the project in two, and a run");
+        println!("started here would read only what is under here.");
+        println!();
+        println!(
+            "Run peko from {} instead.",
+            above.parent().unwrap_or(root).display()
+        );
+        println!("If this really is a project of its own, move it out first.");
+        return Ok(1);
+    }
     let platform = match platform {
         Some(named) => named.to_string(),
         None => config::detect_platform(root)?,
@@ -293,6 +312,19 @@ pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
             Ok(0)
         }
     }
+}
+
+/// The nearest `.pekorc.json` in a directory above this one.
+///
+/// `root` itself is not checked. The caller has already handled that, and it
+/// means something different: a file here is the project, and a file above is
+/// somebody standing in the wrong directory.
+fn config_above(root: &Path) -> Option<std::path::PathBuf> {
+    let start = std::fs::canonicalize(root).unwrap_or_else(|_| root.to_path_buf());
+    start.ancestors().skip(1).find_map(|dir| {
+        let candidate = dir.join(config::FILE);
+        candidate.exists().then_some(candidate)
+    })
 }
 
 /// Run the audit, or say what it would cost.
