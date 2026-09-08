@@ -111,6 +111,29 @@ impl Config {
 /// Guess the platform from what the project holds.
 ///
 /// A guess is only for the first run. `peko init` writes the answer down.
+/// The project root at or above `start`.
+///
+/// The nearest directory holding a `.pekorc.json`, the way git finds `.git`
+/// and cargo finds `Cargo.toml`. A person standing in a source directory is
+/// still in the project, and every command has to agree about which project
+/// that is.
+///
+/// Without this, `Config::load` fell back to a default config whose facts
+/// were empty, `gather` collected only what was under the current directory,
+/// and no overrides were sent. The run then refused for five unanswered facts
+/// that the real config one directory up already answers, and nothing said
+/// which file it had failed to read.
+///
+/// `start` is returned unchanged when nothing above it holds one. That is a
+/// project with no config yet, which `peko init` is for.
+#[must_use]
+pub fn project_root(start: &Path) -> PathBuf {
+    let here = std::fs::canonicalize(start).unwrap_or_else(|_| start.to_path_buf());
+    here.ancestors()
+        .find(|dir| dir.join(FILE).exists())
+        .map_or_else(|| start.to_path_buf(), Path::to_path_buf)
+}
+
 pub fn detect_platform(root: &Path) -> anyhow::Result<String> {
     let ios = walk(root, 3).iter().any(|path| {
         path.extension().is_some_and(|ext| ext == "xcodeproj")

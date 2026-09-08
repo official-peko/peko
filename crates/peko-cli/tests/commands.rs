@@ -618,6 +618,59 @@ fn init_writes_a_config_and_then_leaves_an_existing_one_alone() {
     let _ = std::fs::remove_dir_all(&root);
 }
 
+use base64::Engine as _;
+
+/// A run started in a source directory reads the project it is inside.
+///
+/// Before this, `Config::load` fell back to a default config with no facts,
+/// `gather` collected only what was under the current directory, and no
+/// overrides were sent. The server then refused the run for five unanswered
+/// facts that the config one directory up already answers, and nothing said
+/// which file it had failed to read.
+#[test]
+fn a_run_from_a_source_directory_uses_the_project_config() {
+    let server = Server::start(vec![(200, estimate_answer(0.42, &serde_json::json!([])))]);
+    let (root, _endpoint) = project("subdir", &server.url(), &files());
+
+    // The facts belong to the project, not to the directory somebody stands
+    // in, so this is what has to reach the server from either place.
+    let path = root.join(".pekorc.json");
+    let mut doc: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&path).expect("read")).expect("parse");
+    doc["facts"] = serde_json::json!({"kids_category": false});
+    std::fs::write(&path, doc.to_string()).expect("write");
+
+    let inner = root.join("App");
+    assert!(inner.is_dir(), "the fixture has a source directory");
+
+    let code = with_key("subdir", || {
+        peko_cli::audit(&peko_cli::config::project_root(&inner), false, None, false).expect("runs")
+    });
+    assert_eq!(code, 0);
+
+    let seen = server.requests();
+    let body: serde_json::Value = serde_json::from_str(&seen[0].body).expect("the body is JSON");
+    let encoded = body["overrides"].as_str().expect("the overrides are sent");
+    let sent = base64::engine::general_purpose::STANDARD
+        .decode(encoded)
+        .expect("the overrides decode");
+    let sent: serde_json::Value = serde_json::from_slice(&sent).expect("the overrides parse");
+    assert_eq!(
+        sent["facts"]["kids_category"],
+        serde_json::json!(false),
+        "the project's answers must travel with a run started below it"
+    );
+
+    // And the whole project, not the directory somebody happened to be in.
+    let sources = body["files"]["changed_sources"]
+        .as_array()
+        .expect("the sources are sent");
+    assert!(
+        !sources.is_empty(),
+        "a run from a source directory read nothing"
+    );
+}
+
 /// `peko init` inside a project that already has a config writes nothing.
 ///
 /// Somebody ran it in the source directory of a configured project. It wrote

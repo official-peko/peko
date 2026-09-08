@@ -130,6 +130,28 @@ fn main() {
     }
 }
 
+/// The project this path sits in, and a word about it when it is not the
+/// path itself.
+///
+/// `peko init` is not routed through here on purpose. It creates a project
+/// rather than reading one, and it has its own check for a config above.
+fn project(path: &std::path::Path) -> std::path::PathBuf {
+    let root = peko_cli::config::project_root(path);
+    // Silence is what made the original confusing: a run started in a source
+    // directory read a default config, gathered the files under that
+    // directory, and reported on a fragment without saying so.
+    // Against the canonical form of what was asked for, not the text of it.
+    // `peko audit .` in the project root is not a move, and saying so on
+    // every ordinary run turns the note into noise nobody reads.
+    let asked = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    if root != asked {
+        if let Some(shown) = root.to_str() {
+            eprintln!("peko: reading the project at {shown}");
+        }
+    }
+    root
+}
+
 fn run() -> Result<i32> {
     match Cli::parse().command {
         Command::Lint {
@@ -142,7 +164,7 @@ fn run() -> Result<i32> {
             fail_on,
             allow_undecided,
         } => lint(
-            &path,
+            &project(&path),
             &peko_cli::LintOptions {
                 all,
                 since: &since,
@@ -154,18 +176,18 @@ fn run() -> Result<i32> {
             },
         ),
         Command::Init { path, platform } => init(&path, platform.as_deref()),
-        Command::Facts { path, write } => facts(&path, write),
+        Command::Facts { path, write } => facts(&project(&path), write),
         Command::Audit {
             path,
             yes,
             max_spend,
             json,
-        } => audit(&path, yes, max_spend, json),
+        } => audit(&project(&path), yes, max_spend, json),
         Command::Override {
             rule_id,
             reason,
             path,
-        } => add_override(&path, &rule_id, &reason),
+        } => add_override(&project(&path), &rule_id, &reason),
         Command::Rules {
             platform,
             category,
