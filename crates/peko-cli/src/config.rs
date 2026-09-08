@@ -88,12 +88,23 @@ impl Config {
 
     /// The key, read from wherever the config says it lives.
     pub fn api_key(&self) -> anyhow::Result<String> {
-        std::env::var(&self.api_key_env).map_err(|_| {
-            anyhow::anyhow!(
-                "{} is not set. Run `peko login` or export the key yourself.",
-                self.api_key_env
-            )
-        })
+        // An empty variable is not a key. A CI step that passes an optional
+        // input through sets it to the empty string rather than leaving it
+        // out, and the GitHub Action does exactly that: a run with no key
+        // reached the server, was refused for sending no bearer token, and
+        // reported zero findings on a project full of them.
+        //
+        // Set but empty and never set have to mean the same thing here.
+        std::env::var(&self.api_key_env)
+            .ok()
+            .map(|value| value.trim().to_string())
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "{} is not set. Run `peko login` or export the key yourself.",
+                    self.api_key_env
+                )
+            })
     }
 }
 
@@ -270,5 +281,42 @@ mod endpoint_tests {
         std::env::set_var("PEKO_API_URL", "   ");
         assert_eq!(default_endpoint(), "https://api.peko.so/v1");
         std::env::remove_var("PEKO_API_URL");
+    }
+}
+
+#[cfg(test)]
+mod key_tests {
+    use super::Config;
+
+    /// Set but empty has to mean the same as never set.
+    ///
+    /// A CI step that passes an optional input through sets it to the empty
+    /// string rather than leaving it out. The GitHub Action does exactly that,
+    /// and a run with no key reached the server, was refused for sending no
+    /// bearer token, and reported zero findings on a project full of them.
+    #[test]
+    fn an_empty_variable_is_not_a_key() {
+        let name = "PEKO_TEST_EMPTY_KEY";
+        // Built by hand rather than with a default, so this test says exactly
+        // which field it is about.
+        let config = Config {
+            version: 1,
+            platform: "ios".to_string(),
+            api_key_env: name.to_string(),
+            api_url: String::new(),
+            rest: serde_json::Map::new(),
+        };
+
+        std::env::set_var(name, "");
+        assert!(config.api_key().is_err(), "an empty variable is not a key");
+
+        std::env::set_var(name, "   ");
+        assert!(config.api_key().is_err(), "whitespace is not a key either");
+
+        std::env::set_var(name, "peko_real");
+        assert_eq!(config.api_key().expect("a real key"), "peko_real");
+
+        std::env::remove_var(name);
+        assert!(config.api_key().is_err(), "an unset variable is not a key");
     }
 }

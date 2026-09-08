@@ -123,6 +123,8 @@ runs:
       id: run
       shell: bash
       env:
+        # Empty when nobody passed one. The CLI treats an empty variable as no
+        # key, which it did not always do, and this is the step that found it.
         PEKO_API_KEY: ${{ inputs.api-key }}
         INPUT_SARIF: ${{ inputs.sarif-file }}
         INPUT_FAIL_ON: ${{ inputs.fail-on }}
@@ -163,6 +165,11 @@ runs:
 
     - name: Report the result
       shell: bash
+      # INPUT_FAIL_ON belongs to this step. It was set on the step before, and
+      # with set -u the reference here was a fatal unbound variable, so every
+      # run that had something to report died at the line meant to report it.
+      env:
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
       run: |
         set -euo pipefail
         code="${{ steps.run.outputs.exit-code }}"
