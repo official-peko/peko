@@ -60,13 +60,17 @@ jobs:
 
       - name: The run found the problems the example carries
         shell: bash
+        env:
+          # The action writes it inside the project it checked, and reports
+          # where. Looking in the working directory finds nothing.
+          SARIF: ${{ steps.peko.outputs.sarif-file }}
         run: |
           set -euo pipefail
-          test -s peko.sarif || { echo "the action wrote no SARIF"; exit 1; }
+          test -s "$SARIF" || { echo "the action wrote no SARIF at $SARIF"; exit 1; }
 
           # An example with no findings is an example that teaches nothing, and
           # a run reporting none of them is an engine that did not read it.
-          count=$(python3 -c "import json;d=json.load(open('peko.sarif'));print(len(d['runs'][0]['results']))")
+          count=$(python3 -c "import json,os;d=json.load(open(os.environ['SARIF']));print(len(d['runs'][0]['results']))")
           echo "the run raised $count findings"
           if [ "$count" -lt 3 ]; then
             echo "::error::examples/${{ matrix.example }} carries known problems and only $count were found"
@@ -75,8 +79,8 @@ jobs:
 
           # Every finding has to say where it is, or nobody can act on it.
           python3 - <<'PY'
-          import json
-          results = json.load(open("peko.sarif"))["runs"][0]["results"]
+          import json, os
+          results = json.load(open(os.environ["SARIF"]))["runs"][0]["results"]
           for result in results:
               rule = result.get("ruleId", "")
               assert rule, "a finding with no rule id"

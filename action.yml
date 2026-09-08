@@ -55,7 +55,7 @@ inputs:
 
 outputs:
   sarif-file:
-    description: The SARIF report this run wrote.
+    description: The path to the SARIF report this run wrote.
     value: ${{ steps.run.outputs.sarif-file }}
   findings:
     description: How many findings the run raised.
@@ -145,7 +145,10 @@ runs:
         code=$?
         set -e
 
-        echo "sarif-file=$INPUT_SARIF" >> "$GITHUB_OUTPUT"
+        # Where the file actually is, not what it is called. This runs after
+        # a cd into the project, so a bare name sends a caller looking in the
+        # wrong directory.
+        echo "sarif-file=$INPUT_PATH/$INPUT_SARIF" >> "$GITHUB_OUTPUT"
         if [ -f "$INPUT_SARIF" ]; then
           findings=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['runs'][0]['results']))" "$INPUT_SARIF")
         else
