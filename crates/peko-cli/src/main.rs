@@ -74,7 +74,6 @@ enum Command {
         json: bool,
     },
 
-    /// Read what the project answers for itself, and list what is left.
     /// Tell us what the store decided.
     ///
     /// The one thing that says whether a finding was right. It attaches to
@@ -96,6 +95,7 @@ enum Command {
         notes_file: Option<PathBuf>,
     },
 
+    /// Read what the project answers for itself, and list what is left.
     Facts {
         #[arg(default_value = ".")]
         path: PathBuf,
