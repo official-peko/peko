@@ -39,7 +39,25 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        example: [ios-app, android-app]
+        example: [ios-app, android-app, ios-audit, android-audit]
+        include:
+          # The -app pair carries planted mechanical problems, so the lint has
+          # to report them. The -audit pair is mechanically clean, so the lint
+          # has to report nothing and pass. A lint that always finds something
+          # is as useless as one that never does, and only the second pair
+          # catches that.
+          - example: ios-app
+            expect: problems
+            fail-on: never
+          - example: android-app
+            expect: problems
+            fail-on: never
+          - example: ios-audit
+            expect: clean
+            fail-on: error
+          - example: android-audit
+            expect: clean
+            fail-on: error
 
     steps:
       - uses: actions/checkout@v4
@@ -50,49 +68,63 @@ jobs:
         with:
           path: examples/${{ matrix.example }}
           version: ${{ github.event.inputs.version || 'latest' }}
-          # These examples hold real problems on purpose, so an error is the
-          # expected result and must not fail the job.
-          fail-on: never
+          # The -app pair holds real problems on purpose, so an error there is
+          # the expected result and must not fail the job. The -audit pair is
+          # clean, so an error there is a regression and must fail it.
+          fail-on: ${{ matrix.fail-on }}
           # Code Scanning takes one SARIF per ref, and six jobs would race to
           # be the one it kept. The report is checked below instead.
           upload-sarif: false
           sarif-file: peko.sarif
 
-      - name: The run found the problems the example carries
+      - name: The run reported what this example carries
         shell: bash
         env:
           # The action writes it inside the project it checked, and reports
           # where. Looking in the working directory finds nothing.
           SARIF: ${{ steps.peko.outputs.sarif-file }}
+          EXPECT: ${{ matrix.expect }}
         run: |
           set -euo pipefail
           test -s "$SARIF" || { echo "the action wrote no SARIF at $SARIF"; exit 1; }
 
-          # An example with no findings is an example that teaches nothing, and
-          # a run reporting none of them is an engine that did not read it.
-          count=$(python3 -c "import json,os;d=json.load(open(os.environ['SARIF']));print(len(d['runs'][0]['results']))")
-          echo "the run raised $count findings"
-          if [ "$count" -lt 3 ]; then
-            echo "::error::examples/${{ matrix.example }} carries known problems and only $count were found"
-            exit 1
-          fi
+          python3 - <<'PY'
+          import json, os, sys
+
+          results = json.load(open(os.environ["SARIF"]))["runs"][0]["results"]
+          expect = os.environ["EXPECT"]
+          print(f"the run raised {len(results)} findings")
 
           # A finding has to name its rule, or nobody can look it up.
-          #
-          # Most name a file too, and a run where none of them does is an
+          for result in results:
+              assert result.get("ruleId"), "a finding with no rule id"
+
+          if expect == "clean":
+              # An error or a warning here means the example drifted. The
+              # audit tier needs a project the lint lets through, and a
+              # regression that quietly puts one back is the whole risk.
+              loud = [
+                  r["ruleId"] for r in results
+                  if r.get("level") in ("error", "warning")
+              ]
+              if loud:
+                  print("::error::this example must pass the lint: " + ", ".join(loud))
+                  sys.exit(1)
+              sys.exit(0)
+
+          # An example with no findings is an example that teaches nothing, and
+          # a run reporting none of them is an engine that did not read it.
+          if len(results) < 3:
+              print(f"::error::this example carries known problems and only {len(results)} were found")
+              sys.exit(1)
+
+          # Most findings name a file, and a run where none of them does is an
           # engine that read nothing. But not every finding can: "this project
           # has no privacy manifest" is about a file that does not exist, and
           # pointing at one that does would be a lie for the sake of a line
           # number. Those are counted and named rather than demanded.
-          python3 - <<'PY'
-          import json, os
-          results = json.load(open(os.environ["SARIF"]))["runs"][0]["results"]
-          placed, unplaced = [], []
-          for result in results:
-              rule = result.get("ruleId", "")
-              assert rule, "a finding with no rule id"
-              (placed if result.get("locations") else unplaced).append(rule)
-
+          placed = [r["ruleId"] for r in results if r.get("locations")]
+          unplaced = [r["ruleId"] for r in results if not r.get("locations")]
           assert placed, "no finding named a file, so nothing was really read"
           print(f"{len(placed)} of {len(results)} findings name a file")
           if unplaced:

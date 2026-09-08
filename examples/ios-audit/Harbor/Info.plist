@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>com.example.harbor</string>
+  <key>CFBundleName</key>
+  <string>Harbor</string>
+  <key>CFBundleDisplayName</key>
+  <string>Harbor</string>
+  <key>CFBundleShortVersionString</key>
+  <string>2.1.0</string>
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
+
+  <key>NSCameraUsageDescription</key>
+  <string>Harbor uses the camera so you can photograph a page and attach it to a note.</string>
+
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>Harbor reads your photo library so you can attach an existing picture to a note.</string>
+</dict>
+</plist>
