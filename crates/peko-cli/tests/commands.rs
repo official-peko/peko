@@ -805,3 +805,52 @@ fn the_local_run_names_the_database_it_used() {
     );
     assert_eq!(report["tier"], "lint");
 }
+
+/// The audit request says where the manifests really live.
+///
+/// The server lays their contents out under names of its own, because a rule
+/// matches on a name. Without these it reported findings against its own
+/// names: a real run on a project whose file is `Harbor/Info.plist` produced
+/// six findings pointing at `App/Info.plist`, a path that exists on the server
+/// and nowhere on the machine that asked. The SARIF sent CI to the same place.
+#[test]
+fn the_request_says_where_the_manifests_really_live() {
+    let server = Server::start(vec![(200, estimate_answer(0.42, &serde_json::json!([])))]);
+    let (root, _endpoint) = support::project(
+        "manifest-paths",
+        &server.url(),
+        &[
+            (
+                "Harbor/Info.plist",
+                "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict>\
+                 <key>CFBundleIdentifier</key><string>com.example.h</string></dict></plist>",
+            ),
+            (
+                "Harbor/PrivacyInfo.xcprivacy",
+                "<?xml version=\"1.0\"?><plist/>",
+            ),
+            ("Harbor/View.swift", "import SwiftUI\n"),
+        ],
+    );
+
+    with_key("manifest-paths", || {
+        peko_cli::audit(&root, false, false).expect("runs")
+    });
+
+    let seen = server.requests();
+    let body: serde_json::Value = serde_json::from_str(&seen[0].body).expect("the body is JSON");
+    let paths = &body["files"]["manifests"]["paths"];
+    assert_eq!(
+        paths["info_plist"].as_str(),
+        Some("Harbor/Info.plist"),
+        "the request did not say where Info.plist is: {}",
+        seen[0].body
+    );
+    assert_eq!(
+        paths["privacy_manifest"].as_str(),
+        Some("Harbor/PrivacyInfo.xcprivacy")
+    );
+    // Forward slashes, whatever the platform. A Windows separator in a SARIF
+    // file is a path nothing resolves.
+    assert!(!seen[0].body.contains("Harbor\\\\Info.plist"));
+}

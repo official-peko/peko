@@ -28,6 +28,31 @@ pub struct Manifests {
     pub privacy_manifest: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entitlements: Option<String>,
+    /// Where each of these lives in this project.
+    ///
+    /// The server lays the contents out under names of its own, because a
+    /// rule matches on a name and every project spells these differently.
+    /// Without these it reported findings against its own names, so an audit
+    /// pointed at `App/Info.plist` on a project whose file is
+    /// `Harbor/Info.plist`, and the SARIF sent CI to the same place.
+    pub paths: ManifestPaths,
+}
+
+/// Where the manifests really are, relative to the project root.
+#[derive(Debug, Default, Serialize)]
+pub struct ManifestPaths {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub info_plist: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub android_manifest: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub privacy_manifest: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entitlements: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub xcode_project: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_gradle: Option<String>,
 }
 
 #[derive(Debug, Default, Serialize)]
@@ -67,6 +92,23 @@ fn read(path: &Path) -> Option<String> {
 ///
 /// `changed` names the paths a commit touched. An empty list means the whole
 /// project, which is what a first run does.
+/// A path as the caller would type it, from the project root.
+///
+/// Forward slashes on every platform, because it goes into a report that a
+/// person reads and a tool follows, and a Windows separator in a SARIF file
+/// is a path nothing resolves.
+fn relative(root: &Path, path: &Path) -> Option<String> {
+    let short = path.strip_prefix(root).unwrap_or(path);
+    Some(
+        short
+            .components()
+            .map(|part| part.as_os_str().to_string_lossy())
+            .collect::<Vec<_>>()
+            .join("/"),
+    )
+    .filter(|value| !value.is_empty())
+}
+
 pub fn collect(root: &Path, changed: &[PathBuf]) -> (Files, Vec<String>) {
     let all = crate::config::walk(root, 6);
     let mut files = Files::default();
@@ -79,22 +121,27 @@ pub fn collect(root: &Path, changed: &[PathBuf]) -> (Files, Vec<String>) {
         match name {
             "Info.plist" if files.manifests.info_plist.is_none() => {
                 files.manifests.info_plist = read(path);
+                files.manifests.paths.info_plist = relative(root, path);
             }
             "AndroidManifest.xml" if files.manifests.android_manifest.is_none() => {
                 // Only the manifest the application module ships. A library
                 // manifest is not the one the store reads.
                 if path.to_string_lossy().contains("src/main") {
                     files.manifests.android_manifest = read(path);
+                    files.manifests.paths.android_manifest = relative(root, path);
                 }
             }
             "PrivacyInfo.xcprivacy" if files.manifests.privacy_manifest.is_none() => {
                 files.manifests.privacy_manifest = read(path);
+                files.manifests.paths.privacy_manifest = relative(root, path);
             }
             "project.pbxproj" if files.configs.xcode_project.is_none() => {
                 files.configs.xcode_project = read(path);
+                files.manifests.paths.xcode_project = relative(root, path);
             }
             "build.gradle" | "build.gradle.kts" if files.configs.build_gradle.is_none() => {
                 files.configs.build_gradle = read(path);
+                files.manifests.paths.build_gradle = relative(root, path);
             }
             "Podfile.lock" | "Package.resolved" if files.lockfile.is_none() => {
                 files.lockfile = read(path);
@@ -104,6 +151,7 @@ pub fn collect(root: &Path, changed: &[PathBuf]) -> (Files, Vec<String>) {
                     && files.manifests.entitlements.is_none()
                 {
                     files.manifests.entitlements = read(path);
+                    files.manifests.paths.entitlements = relative(root, path);
                 }
             }
         }
