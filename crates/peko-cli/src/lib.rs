@@ -626,6 +626,61 @@ pub fn facts(root: &Path, write: bool) -> Result<i32> {
     Ok(1)
 }
 
+/// Read a rejection letter and name the rules behind it.
+///
+/// The pricing page has sold this since launch, as "rejection diagnosis,
+/// unlimited" on the free tier, and the route has answered the whole time.
+/// There was no command, so nobody outside this repository could reach it.
+///
+/// It calls no model and costs nothing, which is why the free tier includes
+/// it: somebody who has just been rejected is having a bad day, and putting a
+/// paywall in front of the explanation is the wrong moment to ask for money.
+pub fn diagnose(root: &Path, file: Option<&Path>, text: Option<&str>) -> Result<i32> {
+    let config = Config::load(root)?;
+    let key = config.api_key()?;
+
+    let rejection = match (file, text) {
+        (Some(path), _) => std::fs::read_to_string(path)
+            .with_context(|| format!("could not read {}", path.display()))?,
+        (None, Some(inline)) => inline.to_string(),
+        (None, None) => {
+            // Pasted straight in. A rejection arrives as an email somebody is
+            // looking at, and asking them to save it to a file first is a step
+            // that loses people.
+            use std::io::Read as _;
+            let mut buffer = String::new();
+            std::io::stdin()
+                .read_to_string(&mut buffer)
+                .context("nothing was piped in")?;
+            buffer
+        }
+    };
+    if rejection.trim().is_empty() {
+        return Err(anyhow::anyhow!(
+            "there is no rejection text. Pass --file rejection.txt, or pipe the \
+             letter in: peko diagnose < rejection.txt"
+        ));
+    }
+
+    let response = client()?
+        .post(format!("{}/diagnose", config.api_url))
+        .bearer_auth(&key)
+        .json(&serde_json::json!({
+            "platform": config.platform,
+            "rejection_text": rejection,
+        }))
+        .send()
+        .context("the server did not answer")?;
+    let status = response.status();
+    let body = response.text().unwrap_or_default();
+    if !status.is_success() {
+        return Err(describe(status, &body));
+    }
+    let answer: serde_json::Value = serde_json::from_str(&body)?;
+    print!("{}", render::diagnosis(&answer));
+    Ok(0)
+}
+
 /// Report what the store decided.
 ///
 /// The only command that tells us whether a finding was right. It attaches to

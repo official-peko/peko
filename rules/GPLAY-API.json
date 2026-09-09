@@ -103,6 +103,10 @@
       {
         "change": "Promoted. Verification graded it accurate. The corpus never ran it, because a precondition needs a fact no published app declares, so this grade is the only evidence behind it.",
         "date": "2026-09-02T02:15:06Z"
+      },
+      {
+        "date": "2026-09-09T00:00:00Z",
+        "change": "Retired. It required the literal setting targetSdkVersion, which is the Groovy spelling, so every project using the Kotlin DSL was told targetSdkVersion is not set while correctly declaring targetSdk. A real run against a correct project reported it. GPLAY-API-001 already checks both spellings and carries the severity that matters, so this rule only ever added a false note."
       }
     ],
     "created_at": "2026-09-01T18:09:04.115022Z",
@@ -167,9 +171,9 @@
       "section": "Meet Google Play's target API level requirement",
       "url": "https://developer.android.com/google/play/requirements/target-sdk"
     },
-    "status": "validated",
+    "status": "deprecated",
     "title": "App must target minimum required Android API level",
-    "updated_at": "2026-09-01T18:09:04.115022Z",
+    "updated_at": "2026-09-09T00:00:00Z",
     "version": 1
   }
 ]

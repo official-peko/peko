@@ -88,15 +88,23 @@ fn the_database_holds_both_rule_types() {
 #[test]
 fn every_rule_passed_the_human_validation_gate() {
     let db = database();
+    // Candidate only. A candidate is compiler output nobody has read, and
+    // shipping one is the thing this gate exists to stop.
+    //
+    // Deprecated is not the same and used to fail here. A retired rule has
+    // been read by a person, who decided it should stop running: GPLAY-API-004
+    // demanded the Groovy spelling of a setting and told every Kotlin project
+    // it was missing. Refusing to let a reviewed rule be retired is refusing
+    // to let a wrong one be turned off.
     let candidates: Vec<String> = db
         .rules()
         .iter()
-        .filter(|rule| rule.status != RuleStatus::Validated)
+        .filter(|rule| rule.status == RuleStatus::Candidate)
         .map(|rule| rule.rule_id.to_string())
         .collect();
     assert!(
         candidates.is_empty(),
-        "these rules are not validated and would not run: {candidates:?}"
+        "these rules were never read by a person and would run anyway: {candidates:?}"
     );
 }
 

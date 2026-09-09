@@ -621,3 +621,147 @@ mod allowance_tests {
         assert!(out.contains("12 rules would read your code"));
     }
 }
+
+/// A rejection, and what it points at.
+///
+/// The uncovered citations are printed as prominently as the matches. A
+/// reader who sees three rules and not the guideline nobody has a rule for
+/// would think the list is the whole answer, and go and fix three things
+/// while the fourth is what got them refused.
+#[must_use]
+pub fn diagnosis(body: &Value) -> String {
+    diagnosis_styled(body, crate::style::Style::detect())
+}
+
+#[must_use]
+pub fn diagnosis_styled(body: &Value, style: crate::style::Style) -> String {
+    use std::fmt::Write as _;
+    let mut out = String::new();
+
+    let cited: Vec<&str> = body["citations"]
+        .as_array()
+        .map(|list| {
+            list.iter()
+                .filter_map(|entry| entry["reference"].as_str())
+                .collect()
+        })
+        .unwrap_or_default();
+
+    if cited.is_empty() {
+        let _ = writeln!(
+            out,
+            "No guideline reference was found in that text. Paste the whole \
+             letter, including the part that names a section."
+        );
+        return out;
+    }
+
+    let _ = writeln!(out, "The letter cites {}.", style.bold(&cited.join(", ")));
+
+    let matched = body["matched"].as_array().cloned().unwrap_or_default();
+    if matched.is_empty() {
+        let _ = writeln!(out, "\nNo rule covers any of them yet.");
+    } else {
+        let _ = writeln!(out);
+        for rule in &matched {
+            let _ = writeln!(
+                out,
+                "{}  {}",
+                style.dim(rule["rule_id"].as_str().unwrap_or("")),
+                rule["title"].as_str().unwrap_or("")
+            );
+            if let Some(section) = rule["section"].as_str().filter(|s| !s.is_empty()) {
+                let _ = writeln!(out, "  {}", style.dim(&format!("section {section}")));
+            }
+            if let Some(fix) = rule["fix"].as_str().filter(|s| !s.is_empty()) {
+                for line in wrap(fix, 74) {
+                    let _ = writeln!(out, "  {} {line}", style.fix("fix:"));
+                }
+            }
+            let _ = writeln!(out);
+        }
+    }
+
+    // The honest half.
+    if let Some(uncovered) = body["uncovered_citations"]
+        .as_array()
+        .filter(|list| !list.is_empty())
+    {
+        let names: Vec<&str> = uncovered.iter().filter_map(Value::as_str).collect();
+        let _ = writeln!(
+            out,
+            "{} {}",
+            style.severity("warning"),
+            format_args!(
+                "no rule covers {} yet, so nothing above explains {}.",
+                names.join(", "),
+                if names.len() == 1 { "it" } else { "them" }
+            )
+        );
+        let _ = writeln!(
+            out,
+            "{}",
+            style.dim("Write to contact@pekoui.com with the letter and we will add it.")
+        );
+    }
+    out
+}
+
+#[cfg(test)]
+mod diagnosis_tests {
+    use super::diagnosis_styled;
+    use crate::style::Style;
+    use serde_json::json;
+
+    /// A guideline nobody has a rule for is printed as loudly as the ones
+    /// that matched. A reader who sees three rules and not the fourth
+    /// citation goes and fixes three things while the fourth is what got them
+    /// refused.
+    #[test]
+    fn a_guideline_no_rule_covers_is_not_buried() {
+        let out = diagnosis_styled(
+            &json!({
+                "citations": [{"reference": "3.1.1"}, {"reference": "9.9.9"}],
+                "matched": [{
+                    "rule_id": "AAPL-PAY-012", "title": "Provide a restore mechanism",
+                    "section": "3.1.1", "fix": "Add a visible Restore Purchases control."
+                }],
+                "uncovered_citations": ["9.9.9"],
+            }),
+            Style::plain(),
+        );
+        assert!(out.contains("AAPL-PAY-012"), "{out}");
+        assert!(
+            out.contains("9.9.9"),
+            "the uncovered guideline vanished:\n{out}"
+        );
+        assert!(out.contains("warning"), "{out}");
+        assert!(out.contains("contact@pekoui.com"), "{out}");
+    }
+
+    /// Pasting the wrong thing has to say so rather than print an empty list
+    /// that reads as "nothing is wrong".
+    #[test]
+    fn text_with_no_citation_says_so() {
+        let out = diagnosis_styled(
+            &json!({"citations": [], "matched": [], "uncovered_citations": []}),
+            Style::plain(),
+        );
+        assert!(out.contains("No guideline reference was found"), "{out}");
+    }
+
+    /// Every citation covered, so there is nothing to warn about.
+    #[test]
+    fn a_complete_answer_carries_no_warning() {
+        let out = diagnosis_styled(
+            &json!({
+                "citations": [{"reference": "3.1.1"}],
+                "matched": [{"rule_id": "AAPL-PAY-012", "title": "t", "section": "3.1.1", "fix": "f"}],
+                "uncovered_citations": [],
+            }),
+            Style::plain(),
+        );
+        assert!(!out.contains("warning"), "{out}");
+        assert!(out.contains("The letter cites 3.1.1."), "{out}");
+    }
+}

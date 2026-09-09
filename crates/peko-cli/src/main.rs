@@ -7,7 +7,9 @@
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use peko_cli::{add_override, audit, facts, init, lint, login, report_outcome, rules, status};
+use peko_cli::{
+    add_override, audit, diagnose, facts, init, lint, login, report_outcome, rules, status,
+};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -72,6 +74,21 @@ enum Command {
         /// Print the report as JSON.
         #[arg(long)]
         json: bool,
+    },
+
+    /// Read a rejection letter and name the rules behind it.
+    ///
+    /// Costs nothing and calls no model. Pipe the letter in, or pass --file.
+    Diagnose {
+        /// The project root.
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// A file holding the rejection letter.
+        #[arg(long)]
+        file: Option<PathBuf>,
+        /// The letter itself, if it is short.
+        #[arg(long)]
+        text: Option<String>,
     },
 
     /// Tell us what the store decided.
@@ -232,6 +249,9 @@ fn run() -> Result<i32> {
         Command::Init { path, platform } => init(&path, platform.as_deref()),
         Command::Facts { path, write } => {
             measured(&project(&path), "facts", |root| facts(root, write))
+        }
+        Command::Diagnose { path, file, text } => {
+            diagnose(&project(&path), file.as_deref(), text.as_deref())
         }
         Command::Outcome {
             result,
