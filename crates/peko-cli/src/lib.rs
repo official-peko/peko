@@ -303,14 +303,29 @@ pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
     std::fs::write(&path, serde_json::to_string_pretty(&doc)? + "\n")?;
     println!("Wrote {}.", path.display());
 
+    // No key is not a failure here. The lint needs no account, and this is
+    // the first command anybody runs: telling them the server could not be
+    // reached, when the server is fine and they simply have no key, makes the
+    // tool look broken on the sentence after it says it worked.
+    if Config::load(root).is_ok_and(|config| config.api_key().is_err()) {
+        println!();
+        println!("Some rules need answers the code cannot give, and filling those");
+        println!("in needs a key. The lint does not, so start there:");
+        println!();
+        println!("  peko lint --all");
+        println!();
+        println!("Run `peko facts --write` once you have a key.");
+        return Ok(0);
+    }
+
     // A file with an empty facts block is not usable yet. Every rule that
     // needs an answer reports undecided, and undecided reads like a pass. So
     // fill in what the project answers for itself, and name the rest.
     match facts(root, true) {
         Ok(code) => Ok(code),
         Err(error) => {
-            eprintln!("peko: could not reach the server to fill in the facts: {error}");
-            println!("Run `peko facts --write` when the server answers.");
+            eprintln!("peko: could not fill in the facts: {error}");
+            println!("Run `peko facts --write` to try again.");
             Ok(0)
         }
     }

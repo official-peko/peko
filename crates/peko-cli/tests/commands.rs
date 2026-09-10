@@ -854,3 +854,25 @@ fn the_request_says_where_the_manifests_really_live() {
     // file is a path nothing resolves.
     assert!(!seen[0].body.contains("Harbor\\\\Info.plist"));
 }
+
+/// The first command anybody runs must not look like a failure.
+///
+/// `peko init` tried to fill in the facts, which needs a key, and reported
+/// "could not reach the server to fill in the facts" when the server was fine
+/// and the person simply had none. That is the sentence after the tool says
+/// it worked, on a tool that promises the lint needs no account.
+#[test]
+fn init_without_a_key_does_not_report_a_failure() {
+    let root = std::env::temp_dir().join(format!("peko-cli-firstrun-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("App")).expect("make it");
+    std::fs::write(root.join("App/Info.plist"), PLIST).expect("write");
+
+    // No key at all, which is what a first run looks like. The default
+    // variable is the one an unconfigured project reads.
+    std::env::remove_var("PEKO_API_KEY");
+    let code = peko_cli::init(&root, Some("ios")).expect("init runs");
+    assert_eq!(code, 0, "a first run with no key is not a failure");
+    assert!(root.join(".pekorc.json").exists(), "no config was written");
+    let _ = std::fs::remove_dir_all(&root);
+}
