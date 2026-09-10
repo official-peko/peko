@@ -112,6 +112,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The major tag step below runs git, and this job had no checkout, so it
+      # would have failed on the first release that tried to move it.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -127,3 +133,27 @@ jobs:
           # A checksum beside each binary lets somebody verify what they
           # downloaded. Without one, an install script trusts whatever arrives.
           generate_release_notes: true
+
+      # The major tag is what the README, the docs, and every workflow using
+      # this action point at. It was moved by hand, so it stopped being moved:
+      # it sat six releases behind while everybody following the documented
+      # way to use the action got a binary from weeks earlier.
+      #
+      # Moving a tag is a force update, and it is the convention for an action
+      # major. Somebody who wants a fixed version pins the full one.
+      - name: Move the major tag to this release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          major="${TAG%%.*}"
+          # Only for a real release. A pre-release tag must not move it.
+          case "$TAG" in
+            *-*) echo "$TAG is a pre-release, leaving $major alone"; exit 0 ;;
+          esac
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f "$major" "$TAG^{commit}"
+          git push -f origin "refs/tags/$major"
+          echo "$major now points at $TAG"
