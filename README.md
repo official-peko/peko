@@ -73,8 +73,9 @@ peko init
 peko lint --all
 ```
 
-The first run works offline. The rule database ships inside the binary, and
-nothing leaves your machine.
+The first run needs no account and no server. The rule database ships inside
+the binary, so the check itself reads only files on your machine. What the
+run reports afterwards, and how to turn that off, is below.
 
 ### Something to try it on
 
@@ -139,15 +140,38 @@ forms, and the corpus that measures whether any of it is right.
 
 ## The two tiers
 
-**Lint** runs here, free, offline, on every push. It finds what a file can
-prove: a removed API, a missing declaration, a permission with no stated
-reason.
+**Lint** runs here, free, on every push. It finds what a file can prove: a
+removed API, a missing declaration, a permission with no stated reason.
 
 **Audit** runs on the server before a release. It reads code and judges the
 guidelines a file cannot settle on its own.
 
 `peko lint` uses the server when it has a key, because the rule database
 there is current without upgrading this binary. Without a key it runs here.
+
+## What it sends
+
+The check works without a network. The rule database ships inside the binary,
+and a run with no key reads only files on your machine.
+
+Unless you say otherwise, a finished run reports the command, how long it
+took, what it exited with, the version, the operating system, and the shape of
+the project: how many files, which platform, which framework, and how many
+findings by severity.
+
+It never sends source, file paths, the project name, the bundle id, or your
+key. The send times out after 1.5 seconds and fails silently, so it cannot
+slow a run down or break one.
+
+Three ways to switch it off, and any one of them is enough:
+
+    PEKO_TELEMETRY=off      in the environment
+    "telemetry": false      in .pekorc.json
+    DO_NOT_TRACK=1          the convention other tools honour
+
+With a key, `peko lint` calls the server instead, because the rule database
+there is current without upgrading this binary. That send does include the
+files being checked.
 
 ## What a finding means, and does not
 
