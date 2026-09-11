@@ -1,0 +1,23 @@
+{
+  "name": "peko",
+  "description": "Check an iOS or Android app against App Store and Google Play policy before submitting it. The lint runs on your machine and needs no account.",
+  "version": "1.9.1",
+  "author": {
+    "name": "Peko UI Technologies LLC",
+    "url": "https://peko.so"
+  },
+  "homepage": "https://peko.so",
+  "repository": "https://github.com/official-peko/peko",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "ios",
+    "android",
+    "app-store",
+    "google-play",
+    "compliance",
+    "static-analysis",
+    "mobile"
+  ]
+}

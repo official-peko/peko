@@ -1,0 +1,54 @@
+---
+description: Check an iOS or Android app against App Store and Google Play policy before submitting it. Use when the task involves store review, rejection, compliance, privacy manifests, permissions, purchases, account deletion, or a rejection letter from Apple or Google.
+globs: ["**/*.swift", "**/*.kt", "**/*.java", "**/Info.plist", "**/AndroidManifest.xml", "**/*.xcprivacy", "**/build.gradle*"]
+alwaysApply: false
+---
+
+# Peko
+
+Peko checks a mobile app against published store policy and says what would
+get it refused, with the file and line and the guideline behind it.
+
+Two tiers. The lint runs on this machine, calls no model, and needs no
+account. The audit sends the parts of the source each rule reads to a model
+and judges the guidelines that prose alone decides, and it needs a paid plan.
+
+## Before anything else
+
+Check it is installed, and which one is on the path:
+
+```
+command -v peko && peko --version
+```
+
+There is another tool called `peko` and it shadows this one on some machines.
+If `peko --version` does not print a bare version number, call it by path:
+`/usr/local/bin/peko`.
+
+If it is missing:
+
+```
+curl -fsSL https://peko.so/install.sh | sh
+```
+
+## Running it
+
+```
+peko init          # writes .pekorc.json, once per project
+peko lint --all    # free, local, no account
+peko audit         # prints what it would cost and stops
+peko audit --yes   # runs the interpretive checks, needs a key
+```
+
+Use `--json` when you want to read the report rather than show it.
+
+## Reading a finding
+
+An `error` will get the build rejected. A `warning` is a judgement call a
+reviewer may make either way. An `info` is worth knowing and will not block.
+Each finding names the file, the line, and the guideline it comes from. Fix the
+errors before suggesting a submission.
+
+## The full instructions
+
+The complete version of this, kept current, is at https://peko.so/skill.md
