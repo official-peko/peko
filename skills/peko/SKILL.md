@@ -63,6 +63,10 @@ where it ships, whether it sells data.
 peko facts
 ```
 
+This one needs a key, unlike the lint. Without one it stops and says so, which
+is easy to read as the project being broken rather than the command needing an
+account.
+
 Answer them in the `facts` block of `.pekorc.json`. **Ask the user rather than
 guessing.** A wrong answer here does not produce a wrong finding, it produces
 silence, and silence reads like a pass. `distributes_in` takes only `US`,
