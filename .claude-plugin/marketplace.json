@@ -6,7 +6,7 @@
     "name": "Peko UI Technologies LLC",
     "url": "https://peko.so"
   },
-  "version": "1.9.2",
+  "version": "1.10.0",
   "plugins": [
     {
       "name": "peko",

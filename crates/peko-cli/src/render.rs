@@ -356,19 +356,67 @@ pub fn estimate_styled(body: &Value, style: crate::style::Style) -> String {
 
     let allowance = &body["allowance"];
     let included = allowance["audits_included"].as_u64().unwrap_or(0);
-    if included > 0 {
+    // A run that needs no model is the cheapest answer there is, and it is
+    // said before anything about allowances because it takes from none of
+    // them. This is what the guided demo gets: the answers for that app are
+    // already worked out, so the run costs nothing and spends nothing.
+    if allowance["already_answered"].as_bool().unwrap_or(false) {
+        let _ = writeln!(
+            out,
+            "This run is {}. Every rule it would ask about this app is already answered,",
+            style.bold("free")
+        );
+        let _ = writeln!(
+            out,
+            "{}",
+            style.dim("so it calls no model and takes nothing from your account.")
+        );
+        let _ = writeln!(out);
+    }
+    // A cycle already open is the whole answer, so it is said first and
+    // nothing about the month is said at all. Somebody who has just fixed
+    // what the last audit found needs to know this run is free, or they will
+    // not run it, and the fix goes unchecked.
+    if let Some(days) = allowance["cycle_days_left"].as_i64() {
+        let when = match days {
+            0 => "today".to_string(),
+            1 => "in 1 day".to_string(),
+            more => format!("in {more} days"),
+        };
+        let _ = writeln!(
+            out,
+            "This run is {}. This app has an open cycle, ending {when}.",
+            style.bold("free")
+        );
+        let _ = writeln!(out);
+    } else if included > 0 {
         let used = allowance["audits_used"].as_u64().unwrap_or(0);
         let left = included.saturating_sub(used);
         let _ = writeln!(
             out,
-            "This run uses one audit. {} of {included} left this month.",
+            "This run opens a cycle and uses one. {} of {included} left this month.",
             style.bold(&left.to_string())
+        );
+        let _ = writeln!(
+            out,
+            "{}",
+            style.dim("Every run against this app for the next 7 days is then included.")
         );
         if let Some(resets) = allowance["resets_on"].as_str().filter(|s| !s.is_empty()) {
             let _ = writeln!(
                 out,
                 "{}",
                 style.dim(&format!("The count resets on {resets}."))
+            );
+        }
+        let bought = allowance["cycles_bought"].as_i64().unwrap_or(0);
+        if left == 0 && bought > 0 {
+            let _ = writeln!(
+                out,
+                "{}",
+                style.dim(&format!(
+                    "The month is spent, so this uses one of your {bought} bought cycles."
+                ))
             );
         }
         let _ = writeln!(out);
@@ -598,8 +646,57 @@ mod allowance_tests {
         let out = estimate_styled(&body(), Style::plain());
         assert!(!out.contains('$'), "a price reached the terminal:\n{out}");
         assert!(out.contains("19 of 25"), "{out}");
-        assert!(out.contains("uses one audit"));
+        assert!(out.contains("opens a cycle and uses one"), "{out}");
         assert!(out.contains("resets on 2026-10-01"));
+        // What the cycle buys, said where the decision is made. Selling a
+        // week of runs and printing only the count that went down would mean
+        // nobody re-runs after a fix, which is the thing the cycle is for.
+        assert!(out.contains("next 7 days"), "{out}");
+    }
+
+    /// A run inside an open cycle says so, and says nothing about the month.
+    ///
+    /// Somebody who has just fixed what the last audit found will not run it
+    /// again if the terminal implies it costs another one. That is the whole
+    /// point of the cycle going unused.
+    #[test]
+    fn a_run_inside_an_open_cycle_is_reported_as_free() {
+        let mut body = body();
+        body["allowance"]["cycle_days_left"] = json!(4);
+        let out = estimate_styled(&body, Style::plain());
+
+        assert!(out.contains("free"), "{out}");
+        assert!(out.contains("in 4 days"), "{out}");
+        assert!(
+            !out.contains("19 of 25"),
+            "a free run counted down the month at the reader:\n{out}"
+        );
+    }
+
+    /// The last day of a cycle is still inside it.
+    ///
+    /// Whole days left goes to zero while hours remain, and rounding that
+    /// away would tell somebody a free run costs one of the month's.
+    #[test]
+    fn the_last_day_of_a_cycle_is_still_free() {
+        let mut body = body();
+        body["allowance"]["cycle_days_left"] = json!(0);
+        let out = estimate_styled(&body, Style::plain());
+
+        assert!(out.contains("free"), "{out}");
+        assert!(out.contains("today"), "{out}");
+    }
+
+    /// A spent month with bought cycles left says which one pays.
+    #[test]
+    fn a_spent_month_names_the_bought_cycles_that_cover_it() {
+        let mut body = body();
+        body["allowance"]["audits_used"] = json!(25);
+        body["allowance"]["cycles_bought"] = json!(3);
+        let out = estimate_styled(&body, Style::plain());
+
+        assert!(out.contains("0 of 25"), "{out}");
+        assert!(out.contains("one of your 3 bought cycles"), "{out}");
     }
 
     /// A per-rule dollar figure is a fraction of a cent nobody can act on.
@@ -763,5 +860,54 @@ mod diagnosis_tests {
         );
         assert!(!out.contains("warning"), "{out}");
         assert!(out.contains("The letter cites 3.1.1."), "{out}");
+    }
+}
+
+#[cfg(test)]
+mod free_run_tests {
+    use super::estimate_styled;
+    use crate::style::Style;
+    use serde_json::json;
+
+    /// A run that needs no model says so, and says nothing about a month.
+    ///
+    /// This is what the guided demo shows. Somebody who is told they have
+    /// "3 of 3 left" after a run that cost nothing has been told something
+    /// untrue about their own account.
+    #[test]
+    fn a_run_with_every_answer_in_hand_is_reported_as_free() {
+        let body = json!({
+            "summary": "nothing left to read",
+            "rules": [],
+            "cached": ["AAPL-PAY-012"],
+            "allowance": {
+                "audits_used": 0, "audits_included": 0, "resets_on": "2026-10-01",
+                "already_answered": true
+            },
+        });
+        let out = estimate_styled(&body, Style::plain());
+        assert!(out.contains("free"), "{out}");
+        assert!(out.contains("calls no model"), "{out}");
+        assert!(
+            out.contains("takes nothing"),
+            "a free run did not say it takes nothing from the account:\n{out}"
+        );
+    }
+
+    /// A paying account is told about its month, not about a cached run.
+    #[test]
+    fn a_paid_plan_still_sees_its_own_count() {
+        let body = json!({
+            "summary": "12 rules would read your code",
+            "rules": [{"rule_id": "AAPL-PAY-012", "files": ["a"]}],
+            "cached": [],
+            "allowance": {
+                "audits_used": 1, "audits_included": 3, "resets_on": "2026-10-01",
+                "already_answered": false
+            },
+        });
+        let out = estimate_styled(&body, Style::plain());
+        assert!(!out.contains("free"), "{out}");
+        assert!(out.contains("2 of 3"), "{out}");
     }
 }

@@ -73,6 +73,13 @@ peko init
 peko lint --all
 ```
 
+Or start at <https://peko.so/start>, which gives you a code and walks you
+through it. That path uses `peko start`, which sets the project up, checks
+it, and tells the page how it went so it can follow along. What it sends is
+the step, the platform, the version, and how many findings there were at each
+severity. No code, no file names, and no project name. Every step of that page
+also works by hand, so nothing is lost by ignoring it.
+
 The first run needs no account and no server. The rule database ships inside
 the binary, so the check itself reads only files on your machine. What the
 run reports afterwards, and how to turn that off, is below.
@@ -91,6 +98,30 @@ peko lint --all peko/examples/ios-app
 Three findings on that one and five on the Android one. Fix them and watch
 them go.
 
+`examples/ios-audit` is the interesting one. It passes the lint with nothing
+to report and it is not compliant: its paywall never offers to restore a
+purchase, its account cannot be deleted, and its metrics call sends the
+account email to a third party. No file states any of that, which is what the
+audit tier is for.
+
+```bash
+peko start --demo    # fetches both and runs them, guided
+```
+
+## Keeping it current
+
+```bash
+peko update
+```
+
+It tells you when a newer release exists, once a day at most, on stderr and
+never in JSON or SARIF output. `PEKO_NO_UPDATE_CHECK=1` stops it asking, and
+it never asks in CI.
+
+The rule database updates on its own and needs no command: the binary ships
+with one, fetches a newer one when it can, and falls back to what it has when
+it cannot.
+
 ## In a pull request
 
 ```yaml
@@ -105,7 +136,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: official-peko/peko@v1
         with:
-          version: v1.3.0
+          version: v1.10.0
 ```
 
 Every finding lands on the line it belongs to, in the diff, through GitHub

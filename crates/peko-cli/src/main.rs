@@ -152,15 +152,65 @@ enum Command {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// Follow the guided first run from peko.so.
+    ///
+    /// The code comes from the page. Nothing here works without one, because
+    /// the whole purpose is to tell that page how the run went.
+    Start {
+        /// The code the page printed in the command it gave you.
+        code: String,
+
+        /// Check two sample apps instead of the project you are standing in.
+        #[arg(long)]
+        demo: bool,
+
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Replace this binary with the newest release.
+    Update,
 }
 
 fn main() {
-    match run() {
+    let command = Cli::parse().command;
+    // Worked out before the command runs, because the command consumes it.
+    let say_version = wants_a_version_note(&command);
+
+    let outcome = run(command);
+
+    // After the work and never instead of it. A note about a release is the
+    // least important thing on the screen, so it goes last, on stderr, and
+    // only when somebody is there to read it.
+    if say_version {
+        if let Some(notice) = peko_cli::release::notice(&peko_cli::config::default_endpoint(), false)
+        {
+            peko_cli::release::print_notice(&notice);
+        }
+    }
+
+    match outcome {
         Ok(code) => std::process::exit(code),
         Err(error) => {
             eprintln!("peko: {error:#}");
             std::process::exit(2);
         }
+    }
+}
+
+/// Whether to mention a newer release after this command.
+///
+/// No, when the output is being read by something rather than someone: a
+/// version note in the middle of JSON or SARIF is a corrupted answer. No,
+/// during an update, because they are already doing the thing. No, during the
+/// guided run, which is walking somebody through a script and does not need a
+/// footnote about a release they installed ninety seconds ago.
+fn wants_a_version_note(command: &Command) -> bool {
+    match command {
+        Command::Lint { json, sarif, .. } => !json && sarif.is_none(),
+        Command::Audit { json, .. } => !json,
+        Command::Rules { json, .. } => !json,
+        Command::Update | Command::Start { .. } => false,
+        _ => true,
     }
 }
 
@@ -221,8 +271,8 @@ fn project(path: &std::path::Path) -> std::path::PathBuf {
     root
 }
 
-fn run() -> Result<i32> {
-    match Cli::parse().command {
+fn run(command: Command) -> Result<i32> {
+    match command {
         Command::Lint {
             path,
             all,
@@ -285,5 +335,7 @@ fn run() -> Result<i32> {
         ),
         Command::Status { path } => status(&path),
         Command::Login { path } => login(&path),
+        Command::Start { code, demo, path } => peko_cli::start::start(&path, &code, demo),
+        Command::Update => peko_cli::release::update(),
     }
 }

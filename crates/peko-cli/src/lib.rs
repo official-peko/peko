@@ -13,6 +13,8 @@ pub mod config;
 pub mod gather;
 pub mod local;
 pub mod outcome;
+pub mod release;
+pub mod start;
 pub mod render;
 pub mod style;
 pub mod telemetry;
@@ -266,6 +268,23 @@ fn lint_locally(root: &Path, config: &Config, options: &LintOptions<'_>) -> Resu
 pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
     let path = root.join(config::FILE);
     if path.exists() {
+        // Every config written before cycles existed is missing the project
+        // id, and without one the server bills each run on its own. Nobody
+        // would think to run init again to fix a thing they never knew was
+        // missing, so this is the one command that would plausibly be run and
+        // it fills the gap rather than reporting it.
+        match backfill_project(&path) {
+            Ok(true) => {
+                println!("{} is already here.", path.display());
+                println!();
+                println!("Added a project id, which is what groups a week of audits");
+                println!("against this app into one. Commit it, so a teammate and CI");
+                println!("land in the same week rather than each buying their own.");
+                return Ok(0);
+            }
+            Ok(false) => {}
+            Err(error) => eprintln!("peko: could not read {}: {error}", path.display()),
+        }
         println!("{} is already here. Nothing changed.", path.display());
         println!("Run `peko facts` to fill in what is missing.");
         return Ok(0);
@@ -293,10 +312,16 @@ pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
         Some(named) => named.to_string(),
         None => config::detect_platform(root)?,
     };
+    // Random, and committed. It only has to be unlike every other project's,
+    // and a name taken from the directory would not be: half the apps in the
+    // world live in a directory called app, and two of them under one account
+    // would share a cycle and each get half a week.
+    let project = uuid::Uuid::new_v4().to_string();
     let doc = serde_json::json!({
         "version": 1,
         "platform": platform,
         "api_key_env": "PEKO_API_KEY",
+        "project": project,
         "facts": {},
         "overrides": [],
     });
@@ -329,6 +354,32 @@ pub fn init(root: &Path, platform: Option<&str>) -> Result<i32> {
             Ok(0)
         }
     }
+}
+
+/// Give an existing config a project id, if it has none.
+///
+/// Returns whether anything was written. The file is rewritten from the value
+/// that was parsed out of it, so a key this build does not know about
+/// survives: the config belongs to the project, and dropping a field because
+/// this version had no name for it would be losing somebody else's data.
+fn backfill_project(path: &Path) -> Result<bool> {
+    let text = std::fs::read_to_string(path)?;
+    let mut doc: serde_json::Value = serde_json::from_str(&text)
+        .map_err(|error| anyhow::anyhow!("{} does not parse: {error}", path.display()))?;
+    let Some(object) = doc.as_object_mut() else {
+        return Ok(false);
+    };
+    // A present id is never replaced. Replacing one would end the week the
+    // customer is in the middle of and charge them for the next run.
+    if object.get("project").is_some_and(|value| value.is_string()) {
+        return Ok(false);
+    }
+    object.insert(
+        "project".to_string(),
+        serde_json::Value::String(uuid::Uuid::new_v4().to_string()),
+    );
+    std::fs::write(path, serde_json::to_string_pretty(&doc)? + "\n")?;
+    Ok(true)
 }
 
 /// The nearest `.pekorc.json` in a directory above this one.
@@ -365,6 +416,10 @@ pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
             "platform": config.platform,
             "files": files,
             "overrides": overrides,
+            // Sent so the answer can say whether this run is already paid
+            // for. The estimate only reads the cycle, it never joins one, so
+            // asking twice costs nothing.
+            "project_id": config.project,
         });
         let response = client()?
             .post(format!("{}/audit/estimate", config.api_url))
@@ -409,6 +464,7 @@ pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
         "files": files,
         "overrides": overrides,
         "confirm": true,
+        "project_id": config.project,
     });
     let response = client()?
         .post(format!("{}/audit", config.api_url))

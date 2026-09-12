@@ -22,6 +22,6 @@ with a name and a description at the top, so it ports.
 ## Why a skill and not a README
 
 An agent that has read this runs the free lint before answering a question
-about store compliance, asks before spending one of the month's audits, and
+about store compliance, asks before opening a new audit cycle, and
 does not tell somebody their app is compliant. An agent that has not read it
 guesses at all three.

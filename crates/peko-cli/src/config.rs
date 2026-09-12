@@ -34,6 +34,22 @@ pub struct Config {
     /// It comes from `PEKO_API_URL`, or the default.
     #[serde(skip, default = "default_endpoint")]
     pub api_url: String,
+    /// What this project is called, for billing a week of audits once.
+    ///
+    /// An audit buys a cycle: a week of runs against one app for the price of
+    /// one. The server needs to know which app, and it cannot work that out
+    /// from the files, because a rename or a moved directory would read as a
+    /// different app and charge again.
+    ///
+    /// So it is written once by `peko init` and committed. A teammate and a
+    /// CI runner check out the same file and land in the same cycle, which is
+    /// the behaviour anybody would expect from a per-app allowance.
+    ///
+    /// Optional because a config written before this existed does not have
+    /// one. A run without it opens no cycle and pays its own way, which is
+    /// what every run did before.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project: Option<String>,
     /// Everything else, sent to the server untouched.
     #[serde(flatten)]
     pub rest: serde_json::Map<String, serde_json::Value>,
@@ -73,6 +89,10 @@ impl Config {
                 platform: detect_platform(root)?,
                 api_key_env: default_key_env(),
                 api_url: default_endpoint(),
+                // No file means no committed id, and inventing one here
+                // would make every run a new project and every audit a new
+                // cycle. Nothing is better than something unstable.
+                project: None,
                 rest: serde_json::Map::new(),
             });
         }
@@ -339,6 +359,7 @@ mod key_tests {
             platform: "ios".to_string(),
             api_key_env: name.to_string(),
             api_url: String::new(),
+            project: None,
             rest: serde_json::Map::new(),
         };
 

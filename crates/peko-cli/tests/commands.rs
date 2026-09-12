@@ -619,15 +619,52 @@ fn init_writes_a_config_and_then_leaves_an_existing_one_alone() {
         peko_cli::init(&root, Some("ios")).expect("init runs")
     });
     assert!(root.join(".pekorc.json").exists(), "no config was written");
+    let fresh: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join(".pekorc.json")).expect("read"))
+            .expect("the config parses");
+    assert!(
+        fresh
+            .get("project")
+            .and_then(serde_json::Value::as_str)
+            .is_some_and(|id| uuid::Uuid::parse_str(id).is_ok()),
+        "a new config has no project id, so a week of audits against it would be billed one by one"
+    );
 
     // Point it at the server, then prove a second init does not overwrite.
     support::write_config_named(&root, &server.url(), &support::key_var(key));
-    let before = std::fs::read_to_string(root.join(".pekorc.json")).expect("read");
+    let before: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join(".pekorc.json")).expect("read"))
+            .expect("the config parses");
     with_key(key, || peko_cli::init(&root, Some("ios")).expect("runs"));
+    let after: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join(".pekorc.json")).expect("read"))
+            .expect("the config parses");
+
+    // A project id is added when there is none, because a config written
+    // before cycles existed would otherwise never get one and every audit
+    // against it would be billed on its own. Nothing else may move: the file
+    // belongs to the project, and this is the only command that would
+    // plausibly be run against one that is already set up.
+    for (key, value) in before.as_object().expect("an object") {
+        assert_eq!(
+            after.get(key),
+            Some(value),
+            "init changed {key}, which was already in the config"
+        );
+    }
+    assert!(
+        after.get("project").and_then(serde_json::Value::as_str).is_some(),
+        "init left a config with no project id, so its audits never share a cycle"
+    );
+
+    // And a third run changes nothing at all, now that there is one to keep.
+    with_key(key, || peko_cli::init(&root, Some("ios")).expect("runs"));
+    let third: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join(".pekorc.json")).expect("read"))
+            .expect("the config parses");
     assert_eq!(
-        std::fs::read_to_string(root.join(".pekorc.json")).expect("read"),
-        before,
-        "init overwrote a config that was already there"
+        third, after,
+        "init changed a config that already had everything it needs"
     );
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -875,4 +912,65 @@ fn init_without_a_key_does_not_report_a_failure() {
     assert_eq!(code, 0, "a first run with no key is not a failure");
     assert!(root.join(".pekorc.json").exists(), "no config was written");
     let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The audit tells the server which app it is.
+///
+/// Without this the server opens no cycle, every run is billed on its own,
+/// and the only symptom is a customer running out of audits four times
+/// faster than the page said they would. Nothing errors, nothing logs, and
+/// the tool looks like it worked.
+#[test]
+fn an_audit_names_the_project_so_a_week_of_runs_bills_once() {
+    let started = serde_json::json!({
+        "job_id": "22222222-2222-2222-2222-222222222222",
+        "state": "running", "rules_total": 1,
+        "estimated_cost_usd": 0.42, "requests_remaining_today": 4,
+        "poll": "/v1/audit/22222222-2222-2222-2222-222222222222"
+    })
+    .to_string();
+    let done = serde_json::json!({
+        "job_id": "22222222-2222-2222-2222-222222222222",
+        "state": "done", "rules_total": 1, "rules_done": 1,
+        "spent_usd": 0.42, "report_available_for_minutes": 60,
+        "report": {"tier": "audit", "findings": [],
+                   "summary": {"by_severity": {"error": 0, "warning": 0, "info": 0}}}
+    })
+    .to_string();
+
+    let server = Server::start(vec![
+        (200, estimate_answer(0.42, &serde_json::json!([]))),
+        (200, started),
+        (200, done),
+    ]);
+    let (root, _endpoint) = project("audit-project", &server.url(), &files());
+    let key = "audit-project";
+
+    // The config the harness writes has no project id, which is exactly the
+    // state every config written before cycles existed is in. Running init
+    // against it is how somebody gets one.
+    with_key(key, || peko_cli::init(&root, Some("ios")).expect("init runs"));
+    let written: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join(".pekorc.json")).expect("read"))
+            .expect("the config parses");
+    let id = written
+        .get("project")
+        .and_then(serde_json::Value::as_str)
+        .expect("init wrote a project id")
+        .to_string();
+
+    with_key(key, || peko_cli::audit(&root, true, false).expect("runs"));
+
+    let seen = server.requests();
+    let start = seen
+        .iter()
+        .find(|request| request.method == "POST" && request.path.ends_with("/audit"))
+        .expect("the job must have been started");
+    let body: serde_json::Value = serde_json::from_str(&start.body).expect("the body is JSON");
+    assert_eq!(
+        body.get("project_id").and_then(serde_json::Value::as_str),
+        Some(id.as_str()),
+        "the run did not say which app it was, so it opens no cycle: {}",
+        start.body
+    );
 }

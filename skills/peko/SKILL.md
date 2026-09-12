@@ -76,12 +76,19 @@ silence, and silence reads like a pass. `distributes_in` takes only `US`,
 
 ```
 peko audit          # says what it would read, uses nothing
-peko audit --yes    # runs it, uses one of the month's audits
+peko audit --yes    # runs it
 ```
 
-It takes minutes and uses one of a fixed number per month, so **ask the user
-before running it with `--yes`.** It refuses while the free checks are
-failing, and while a fact a rule needs has no answer. Fix those first.
+It takes minutes. The first run against an app opens a cycle and uses one of
+a fixed number per month, so **ask the user before the first one.** Every run
+against the same app for the next seven days is included, so once a cycle is
+open, re-running after a fix costs nothing and is worth doing.
+
+`peko audit` without `--yes` says whether a run would be free. Read it before
+asking, rather than asking every time.
+
+It refuses while the free checks are failing, and while a fact a rule needs
+has no answer. Fix those first.
 
 ## A rejection letter
 
@@ -126,8 +133,9 @@ Scanning.
   partial, and the reports say so. Report what it found.
 - Do not treat a finding as legal advice. Each cites the policy section it
   comes from; quote that and let the user decide.
-- Do not run `peko audit --yes` without asking. It spends one of a limited
-  number.
+- Do not open a new cycle without asking. The first audit against an app
+  spends one of a limited number. A re-run inside an open cycle does not, and
+  refusing to re-run after a fix is its own mistake.
 - Do not invent rule ids. Use the ones the output prints.
 - Do not edit the `facts` block on a guess.
 
