@@ -400,8 +400,28 @@ fn config_above(root: &Path) -> Option<std::path::PathBuf> {
 /// The estimate always runs first and it always costs nothing. `--yes` is the
 /// only thing that spends money, and it needs a number with it.
 pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
+    audit_run(root, yes, json, None)
+}
+
+/// Run an audit with a key that did not come from the environment.
+///
+/// The guided demo uses this. It fetches a key that can only run the sample
+/// app, so nobody has to be handed a credential to paste, and the ordinary
+/// path stays the only one that reads `PEKO_API_KEY`.
+///
+/// # Errors
+///
+/// The same as `audit`.
+pub fn audit_with_key(root: &Path, key: &str) -> Result<i32> {
+    audit_run(root, true, false, Some(key.to_string()))
+}
+
+fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Result<i32> {
     let config = Config::load(root)?;
-    let key = config.api_key()?;
+    let key = match given {
+        Some(key) => key,
+        None => config.api_key()?,
+    };
     let (files, skipped) = gather::collect(root, &[]);
     for path in &skipped {
         eprintln!("peko: {path} is too large for an audit, and was left out");

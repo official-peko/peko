@@ -208,6 +208,42 @@ fn tell(api_url: &str, code: &str, step: &str, body: Value) {
         .send();
 }
 
+/// Ask for a key that can only run the demo.
+///
+/// Fetched here rather than shown on the page and pasted, because a key is a
+/// thing people should not be in the habit of copying out of a browser, and
+/// this one is worth nothing anyway: it belongs to an organisation on the
+/// free plan, so it can run the sample app, whose answers are already worked
+/// out, and nothing else.
+///
+/// `None` on any failure. The lint has already run and printed its findings
+/// by this point, so a demo that stops short of the audit is a smaller loss
+/// than a command that ends in an error about something nobody asked for.
+fn demo_key(api_url: &str, code: &str) -> Option<String> {
+    #[derive(serde::Deserialize)]
+    struct Issued {
+        key: String,
+    }
+    let client = reqwest::blocking::Client::builder()
+        .timeout(Duration::from_secs(15))
+        .build()
+        .ok()?;
+    // An empty object, not an empty request. A POST carrying neither a body
+    // nor a Content-Length is refused by the proxy in front of the server
+    // with 411 before it reaches any of our code, which is why this works
+    // from curl, which always sends the header, and did not from here.
+    let issued: Issued = client
+        .post(format!("{api_url}/onboard/{code}/key"))
+        .json(&serde_json::json!({}))
+        .send()
+        .ok()?
+        .error_for_status()
+        .ok()?
+        .json()
+        .ok()?;
+    Some(issued.key)
+}
+
 /// Refuse a code that is not one of ours before it goes into a URL.
 fn looks_like_a_code(code: &str) -> bool {
     code.len() == 35 && code.starts_with("ob-") && code[3..].bytes().all(|b| b.is_ascii_hexdigit())
@@ -284,17 +320,39 @@ fn guided_demo(root: &Path, api_url: &str, code: &str) -> Result<i32> {
         }),
     );
 
-    // The whole pitch, and it is only worth making because the run above just
+    // The pitch, and it is only worth making because the run above just
     // demonstrated it rather than claimed it.
     println!("Harbor passes the lint. Harbor is not compliant.");
     println!();
-    println!("Its paywall never offers to restore a purchase. Its account cannot");
-    println!("be deleted. Its sign in has no option that hides an address. Its");
-    println!("metrics call sends the account email to a third party.");
+    println!("Everything wrong with it is a thing no file states, so no check that");
+    println!("reads files can find any of it. That needs a model to read the code,");
+    println!("which is the audit. Running one on Harbor now.");
     println!();
-    println!("No file states any of those, so no check that reads files can find");
-    println!("them. That is what the audit tier is for, and the page you opened");
-    println!("will walk you through running one on Harbor at no charge.");
+
+    // No account, and no key for anybody to handle. The one fetched here can
+    // audit this sample app and nothing else.
+    let Some(key) = demo_key(api_url, code) else {
+        println!("Could not reach peko.so for the audit. The lint above still stands.");
+        println!();
+        println!("  {}", peko_page(code));
+        return Ok(0);
+    };
+
+    match crate::audit_with_key(&passing, &key) {
+        Ok(_) => {
+            tell(
+                api_url,
+                code,
+                "audited",
+                serde_json::json!({ "demo": true, "platform": "ios" }),
+            );
+        }
+        Err(error) => {
+            println!("The audit did not finish: {error}");
+            println!("The lint above still stands.");
+        }
+    }
+
     println!();
     println!("  {}", peko_page(code));
     Ok(0)
