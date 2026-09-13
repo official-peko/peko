@@ -186,6 +186,77 @@ impl Counts {
     }
 }
 
+/// The findings from one report, trimmed to what a page can show.
+///
+/// Only ever called for the sample apps. They are ours, they ship in a public
+/// repository, and there is nothing in them to protect. A run against
+/// somebody's own project sends counts and nothing else: a rule id paired
+/// with a file name is a description of code we were never given permission
+/// to describe, and it is the sort of thing that is obvious only after it has
+/// already been sent.
+///
+/// Capped, because the page has to render it and this is somebody's network.
+fn findings_of(report: &Value) -> Vec<Value> {
+    const MOST: usize = 40;
+    const LONGEST: usize = 240;
+
+    let trim = |text: &str| -> String {
+        if text.chars().count() <= LONGEST {
+            return text.to_string();
+        }
+        text.chars().take(LONGEST).collect::<String>() + "..."
+    };
+
+    report["findings"]
+        .as_array()
+        .map(|all| {
+            all.iter()
+                .take(MOST)
+                .map(|finding| {
+                    // The names come from the report, which nests the
+                    // place and the remedy rather than flattening them. Read
+                    // from the wrong keys this produced findings with no file
+                    // and no fix, which looked like the report had neither.
+                    serde_json::json!({
+                        "rule": finding["rule_id"].as_str().unwrap_or_default(),
+                        "severity": finding["severity"].as_str().unwrap_or_default(),
+                        "title": trim(finding["title"].as_str().unwrap_or_default()),
+                        "detail": trim(finding["message"].as_str().unwrap_or_default()),
+                        "file": finding["location"]["file"].as_str().unwrap_or_default(),
+                        "line": finding["location"]["line_start"].as_u64(),
+                        "fix": trim(
+                            finding["remediation"]["summary"]
+                                .as_str()
+                                .or_else(|| finding["remediation"]["fix"].as_str())
+                                .unwrap_or_default(),
+                        ),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Wait for the reader before telling the page to move on.
+///
+/// The work is finished by the time this is called and the page is already
+/// showing what it found. Without this it would move on the instant the last
+/// report landed, which is the moment somebody has just started reading.
+///
+/// Returns immediately when nothing is attached to type into it, so a script
+/// or a CI job is not left waiting on a key nobody is there to press.
+fn wait_for_enter() -> bool {
+    use std::io::IsTerminal as _;
+    if !std::io::stdin().is_terminal() {
+        return true;
+    }
+    println!();
+    println!("Press enter when you have read it, and the page will carry on.");
+    let mut line = String::new();
+    let _ = std::io::stdin().read_line(&mut line);
+    true
+}
+
 /// Tell the page how the run went.
 ///
 /// Best effort and silent on failure, the same as the telemetry next door. A
@@ -317,6 +388,11 @@ fn guided_demo(root: &Path, api_url: &str, code: &str) -> Result<i32> {
             "platform": "ios",
             "lint": first_counts,
             "clean": second_counts,
+            // Safe to send: these are our own sample projects.
+            "findings": {
+                "lint": findings_of(&first),
+                "clean": findings_of(&second),
+            },
         }),
     );
 
@@ -338,13 +414,17 @@ fn guided_demo(root: &Path, api_url: &str, code: &str) -> Result<i32> {
         return Ok(0);
     };
 
-    match crate::audit_with_key(&passing, &key) {
-        Ok(_) => {
+    match crate::audit_with_key_reporting(&passing, &key) {
+        Ok(report) => {
             tell(
                 api_url,
                 code,
                 "audited",
-                serde_json::json!({ "demo": true, "platform": "ios" }),
+                serde_json::json!({
+                    "demo": true,
+                    "platform": "ios",
+                    "findings": { "audit": findings_of(&report) },
+                }),
             );
         }
         Err(error) => {
@@ -353,8 +433,12 @@ fn guided_demo(root: &Path, api_url: &str, code: &str) -> Result<i32> {
         }
     }
 
+    // The page is showing all of it by now. It moves on when the reader says
+    // so, not when the work happens to finish.
     println!();
     println!("  {}", peko_page(code));
+    wait_for_enter();
+    tell(api_url, code, "done", serde_json::json!({ "demo": true }));
     Ok(0)
 }
 
@@ -388,6 +472,8 @@ fn guided_own_project(root: &Path, api_url: &str, code: &str) -> Result<i32> {
     println!();
     println!("Carry on here:");
     println!("  {}", peko_page(code));
+    wait_for_enter();
+    tell(api_url, code, "done", serde_json::json!({ "demo": false }));
     Ok(0)
 }
 

@@ -400,7 +400,7 @@ fn config_above(root: &Path) -> Option<std::path::PathBuf> {
 /// The estimate always runs first and it always costs nothing. `--yes` is the
 /// only thing that spends money, and it needs a number with it.
 pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
-    audit_run(root, yes, json, None)
+    audit_run(root, yes, json, None).map(|(code, _)| code)
 }
 
 /// Run an audit with a key that did not come from the environment.
@@ -413,10 +413,28 @@ pub fn audit(root: &Path, yes: bool, json: bool) -> Result<i32> {
 ///
 /// The same as `audit`.
 pub fn audit_with_key(root: &Path, key: &str) -> Result<i32> {
-    audit_run(root, true, false, Some(key.to_string()))
+    audit_run(root, true, false, Some(key.to_string())).map(|(code, _)| code)
 }
 
-fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Result<i32> {
+/// The same, handing back the report it produced.
+///
+/// The guided setup shows the findings on the page as well as in the
+/// terminal, so it needs what the run found rather than only how it exited.
+///
+/// # Errors
+///
+/// The same as `audit`.
+pub fn audit_with_key_reporting(root: &Path, key: &str) -> Result<serde_json::Value> {
+    let (_, report) = audit_run(root, true, false, Some(key.to_string()))?;
+    Ok(report)
+}
+
+fn audit_run(
+    root: &Path,
+    yes: bool,
+    json: bool,
+    given: Option<String>,
+) -> Result<(i32, serde_json::Value)> {
     let config = Config::load(root)?;
     let key = match given {
         Some(key) => key,
@@ -452,7 +470,7 @@ fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Resul
         if !status.is_success() {
             // A tier that does not include this is not a fault to report.
             if print_limit(status, &text) {
-                return Ok(0);
+                return Ok((0, serde_json::Value::Null));
             }
             return Err(describe(status, &text));
         }
@@ -471,7 +489,7 @@ fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Resul
             println!("Fix the above first, then run it with --yes.");
         }
         // Showing what a run would use is not a failure, and a blocker is.
-        return Ok(i32::from(!blockers.is_empty()));
+        return Ok((i32::from(!blockers.is_empty()), serde_json::Value::Null));
     }
 
     // Nothing here names a cap. The plan sets what one run may cost and the
@@ -498,7 +516,7 @@ fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Resul
         // The month can run out between the estimate and the start, so this
         // path meets the same wall the estimate does.
         if print_limit(status, &text) {
-            return Ok(0);
+            return Ok((0, serde_json::Value::Null));
         }
         return Err(describe(status, &text));
     }
@@ -521,11 +539,17 @@ fn audit_run(root: &Path, yes: bool, json: bool, given: Option<String>) -> Resul
 
     if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
-        return Ok(render::exit_code(&report["report"], "error"));
+        return Ok((
+            render::exit_code(&report["report"], "error"),
+            report["report"].clone(),
+        ));
     }
     print!("{}", render::report(&report["report"]));
     println!();
-    Ok(render::exit_code(&report["report"], "error"))
+    Ok((
+        render::exit_code(&report["report"], "error"),
+        report["report"].clone(),
+    ))
 }
 
 /// Write down the audit that just finished.

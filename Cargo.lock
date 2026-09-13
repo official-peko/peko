@@ -861,7 +861,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "peko-check"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "chrono",
  "globset",
@@ -878,7 +878,7 @@ dependencies = [
 
 [[package]]
 name = "peko-cli"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "anyhow",
  "base64",
@@ -896,7 +896,7 @@ dependencies = [
 
 [[package]]
 name = "peko-parse"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "peko-rules",
  "plist",
@@ -910,7 +910,7 @@ dependencies = [
 
 [[package]]
 name = "peko-report"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "chrono",
  "peko-check",
@@ -923,7 +923,7 @@ dependencies = [
 
 [[package]]
 name = "peko-rules"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "chrono",
  "ed25519-dalek",

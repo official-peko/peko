@@ -136,7 +136,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: official-peko/peko@v1
         with:
-          version: v1.11.0
+          version: v1.12.0
 ```
 
 Every finding lands on the line it belongs to, in the diff, through GitHub
